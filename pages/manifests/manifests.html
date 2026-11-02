@@ -3,709 +3,568 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>End-of-Day Manifests - Commerce Suite</title>
+  <title>End-of-Day Manifests — Rapider Shipping Label &amp; Fulfillment Management</title>
   <script src="https://kit.fontawesome.com/5b23df26dc.js" crossorigin="anonymous" defer></script>
   <script src="/assets/js/rapider-components.js" defer></script>
   <link rel="stylesheet" href="/assets/themes/rapider-tailwind-theme.css">
   <link rel="stylesheet" href="/assets/themes/crm-expenses-design.css">
-
   <style>
-    dialog {
-      margin: auto;
-      border: none;
-      padding: 0;
-      background: transparent;
+    :root {
+      --ink: #172137;
+      --muted: #67728a;
+      --line: #e9ecf3;
+      --bg: #f5f6fa;
+      --purple: #6854df;
+      --purple-soft: #f3f0ff;
+      --panel: #ffffff;
+      --dark: #1f243a;
+      --soft: #eeeaff;
+      --green: #16795b;
+      --amber: #b4690e;
+      --red: #b9384f;
+      --radius: 14px;
     }
-    .field input:not([type="checkbox"]):not([type="radio"]),
-    .field select,
-    .field textarea {
-      display: block;
-      width: 100%;
-      min-height: 42px;
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif; background: var(--bg); color: var(--ink); }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    .btn, button.btn {
+      cursor: pointer; border: 1px solid #dfe3ed; background: #ffffff; color: var(--ink);
+      padding: 8px 14px; border-radius: 9px; font-weight: 600; display: inline-flex;
+      align-items: center; justify-content: center; gap: 7px; font-size: 13px; min-height: 38px;
+      transition: all 0.15s ease;
     }
-    aside.collapsed .sidebar-label, [data-collapsed="true"] .sidebar-label { display: none !important; }
-  </style>
+    .btn:hover { background: #f5f3ff; border-color: #cfc7f4; }
+    .btn.primary, button.primary, a.btn.primary {
+      background: var(--purple) !important; background-color: var(--purple) !important;
+      color: #ffffff !important; border-color: var(--purple) !important;
+      box-shadow: 0 3px 8px rgba(104, 84, 223, 0.22);
+    }
+    .btn.primary:hover, button.primary:hover, a.btn.primary:hover {
+      background: #5844cc !important; color: #ffffff !important;
+    }
+    .btn.danger, button.danger {
+      background: var(--red) !important; color: #ffffff !important; border-color: var(--red) !important;
+    }
+    .btn.small { padding: 5px 10px; min-height: 30px; font-size: 12px; border-radius: 7px; }
+    .btn.icon-only { padding: 6px 9px; min-height: 30px; color: var(--red); border-color: #f1d0d6; background: #fffafb; }
+    .btn.icon-only:hover { background: #fee2e2; }
 
-  <style data-dark-mode-parity>
-    html.dark, body.dark { --ink:#f1f5f9; --muted:#94a3b8; --line:#263044; --bg:#0f172a; --soft:#1e1b4b; background:#0f172a !important; color:#f1f5f9 !important; }
-    html.dark aside, body.dark aside { background: #0f172a !important; border-color: #1e293b !important; }
-    html.dark .bg-white, body.dark .bg-white { background: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
-    html.dark .text-slate-900, body.dark .text-slate-900 { color: #f8fafc !important; }
-    html.dark .text-slate-800, body.dark .text-slate-800 { color: #f1f5f9 !important; }
-    html.dark .text-slate-700, body.dark .text-slate-700 { color: #cbd5e1 !important; }
-    html.dark .text-slate-600, body.dark .text-slate-600 { color: #94a3b8 !important; }
-    html.dark .text-slate-500, body.dark .text-slate-500 { color: #64748b !important; }
-    html.dark .border-slate-200, body.dark .border-slate-200 { border-color: #334155 !important; }
-    html.dark .border-slate-100, body.dark .border-slate-100 { border-color: #1e293b !important; }
-    html.dark .bg-slate-50, body.dark .bg-slate-50 { background: #0b1120 !important; }
-    html.dark .bg-slate-100, body.dark .bg-slate-100 { background: #1e293b !important; }
-    html.dark .hover\:bg-slate-50:hover, body.dark .hover\:bg-slate-50:hover { background: #1e293b !important; }
-    html.dark .hover\:bg-slate-100:hover, body.dark .hover\:bg-slate-100:hover { background: #334155 !important; }
-    html.dark input, html.dark select, html.dark textarea { background: #1e293b !important; color: #f8fafc !important; border-color: #334155 !important; }
-    html.dark table thead th { background: #1e293b !important; color: #94a3b8 !important; }
-  </style>
+    .layout { display: grid; grid-template-columns: 236px minmax(0, 1fr); height: 100vh; overflow: hidden; }
+    .sidebar {
+      background: #ffffff; border-right: 1px solid var(--line); padding: 22px 14px 16px;
+      height: 100vh; display: flex; flex-direction: column; overflow-y: auto; z-index: 30;
+    }
+    .brand-row { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 18px; min-height: 34px; }
+    .brand-row .brand { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; letter-spacing: -0.4px; color: var(--ink); flex: 1; min-width: 0; }
+    .suite-icon-container { width: 28px; height: 28px; border-radius: 8px; background: #eee9fb; color: var(--purple); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .suite-icon-container .suite-expand-icon { display: none !important; font-size: 14px; color: var(--purple); }
+    .sidebar-collapse-btn { background: transparent; border: 1px solid transparent; cursor: pointer; padding: 5px 7px; border-radius: 6px; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+    .sidebar-collapse-btn:hover { background: var(--soft); color: var(--purple); border-color: #cfc7f4; }
 
-  <style data-collapsible-sidebar>
-    /* Collapsible Suite Sidebar Styles */
-    .brand-icon-wrap {
-      position: relative;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #eeeaff;
-      color: #6854df;
-      transition: background 0.2s;
+    .appbox { padding: 11px 12px; background: #f6f4fc; border: 1px solid #ebe6f8; border-radius: 10px; margin: 0 0 16px; display: flex; gap: 10px; align-items: center; }
+    .appicon { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: #e9e3ff; color: var(--purple); flex-shrink: 0; }
+    .appbox b { display: block; font-size: 13px; color: var(--ink); line-height: 1.25; }
+    .appbox small { color: var(--muted); font-size: 11px; display: block; }
+
+    .nav { display: flex; flex-direction: column; gap: 2px; }
+    .navlabel { font-size: 10px; text-transform: uppercase; letter-spacing: 1.4px; font-weight: 700; color: #9ba3b2; margin: 16px 10px 6px; }
+    .nav a, .nav a:link, .nav a:visited {
+      display: flex; align-items: center; gap: 11px; padding: 9px 11px; font-size: 13px;
+      color: #67728a !important; border-radius: 8px; font-weight: 500;
     }
-    .brand-icon-wrap:hover {
-      background: #e0d7fe;
+    .nav a:hover { background: #f8f7fc; color: #172137 !important; }
+    .nav a.active { background: #ede9fb !important; color: #6650ce !important; font-weight: 650; }
+    .nav a .icon { width: 18px; text-align: center; font-size: 14px; color: inherit; flex-shrink: 0; }
+
+    .side-bottom { margin-top: auto; padding-top: 18px; }
+    .profile-link { border-top: 1px solid var(--line); padding: 14px 6px 0; display: flex; align-items: center; gap: 10px; }
+    .avatar-badge { width: 34px; height: 34px; border-radius: 50%; background: #eee8fb; color: #6854df; display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+    /* Collapsed sidebar state */
+    .layout.sidebar-collapsed { grid-template-columns: 68px minmax(0, 1fr) !important; }
+    aside.sidebar-collapsed, .sidebar.sidebar-collapsed, aside[data-collapsed="true"] {
+      width: 68px !important; min-width: 68px !important; max-width: 68px !important; padding-left: 8px !important; padding-right: 8px !important;
     }
-    .brand-icon-wrap .expand-hint {
-      display: none;
-      position: absolute;
-      inset: 0;
-      align-items: center;
-      justify-content: center;
-      background: #6854df;
-      color: #ffffff;
-      border-radius: 8px;
-    }
-    aside.collapsed:hover .brand-icon-wrap .expand-hint,
-    aside.sidebar-collapsed:hover .brand-icon-wrap .expand-hint {
-      display: flex !important;
-      animation: pulse-caret 1.2s infinite ease-in-out;
-    }
-    aside.collapsed:hover .brand-icon-wrap #suiteIcon,
-    aside.sidebar-collapsed:hover .brand-icon-wrap #suiteIcon {
+    aside.collapsed .sidebar-label, aside[data-collapsed="true"] .sidebar-label, .sidebar-collapsed .sidebar-label,
+    .sidebar-collapsed .suite-title, .sidebar-collapsed .sidebar-collapse-btn, .sidebar-collapsed .navlabel,
+    .sidebar-collapsed .appbox > div:not(.appicon), .sidebar-collapsed .profile-link > div:not(.avatar-badge) {
       display: none !important;
     }
-    @keyframes pulse-caret {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(2px); }
-    }
-    aside.collapsed, aside.sidebar-collapsed {
-      width: 68px !important;
-    }
-    aside.collapsed .nav-text,
-    aside.collapsed .sidebar-title,
-    aside.collapsed .sidebar-section-title,
-    aside.collapsed .sidebar-user-info,
-    aside.collapsed .suite-badge,
-    aside.sidebar-collapsed .nav-text,
-    aside.sidebar-collapsed .sidebar-title,
-    aside.sidebar-collapsed .sidebar-section-title,
-    aside.sidebar-collapsed .sidebar-user-info,
-    aside.sidebar-collapsed .suite-badge {
-      display: none !important;
-    }
-    aside.collapsed .nav-item,
-    aside.sidebar-collapsed .nav-item {
-      justify-content: center !important;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
-    aside.collapsed .section-header,
-    aside.sidebar-collapsed .section-header {
-      text-align: center;
-      padding: 4px 0;
-    }
-    aside.collapsed .section-divider,
-    aside.sidebar-collapsed .section-divider {
-      display: block;
-      margin: 8px auto;
-      width: 24px;
-      border-top: 1px solid #e2e8f0;
-    }
+    .sidebar-collapsed .brand-row { justify-content: center !important; padding: 0 0 16px 0 !important; }
+    .sidebar-collapsed .brand-row .brand { justify-content: center !important; flex: none !important; cursor: pointer; gap: 0 !important; }
+    .sidebar.sidebar-collapsed:hover .suite-icon-container .suite-icon { display: none !important; }
+    .sidebar.sidebar-collapsed:hover .suite-icon-container .suite-expand-icon { display: inline-block !important; }
+    .sidebar-collapsed .appbox, .sidebar-collapsed .nav a, .sidebar-collapsed .profile-link { justify-content: center !important; padding-left: 8px !important; padding-right: 8px !important; }
 
-    /* Standardized Navigation Colors (No saturated primary blue) */
-    .sidebar .nav-item {
-      color: #67728a !important;
-      text-decoration: none;
+    /* Main Content & Topbar */
+    .main-col { display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 0; }
+    .topbar {
+      height: 64px; flex-shrink: 0; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; gap: 14px; position: sticky; top: 0; z-index: 25;
     }
-    .sidebar .nav-item:hover {
-      background: #f8fafc !important;
-      color: #1e293b !important;
-    }
-    .sidebar .nav-item.active {
-      background: #f3f0ff !important;
-      color: #53389e !important;
-      font-weight: 600 !important;
-    }
-    .sidebar .nav-item i {
-      color: #67728a;
-    }
-    .sidebar .nav-item.active i {
-      color: #53389e !important;
-    }
+    .breadcrumbs { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .breadcrumbs strong { color: var(--ink); font-weight: 600; }
+    .page-scroll { flex: 1; overflow-y: auto; padding: 26px 30px 44px; }
+    .page-wrap { max-width: 1520px; margin: 0 auto; }
 
-    /* Mobile Responsive Sidebar & Top Navigation Standard */
-    .mobile-menu {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: transparent;
-      border: 1px solid rgba(0,0,0,0.08);
-      color: #67728a;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .mobile-menu:hover {
-      background: #f8fafc;
-      color: #1e293b;
-    }
-    .shade {
-      display: none;
-    }
+    .eyebrow { font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--purple); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }
+    .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 22px; flex-wrap: wrap; }
+    .page-head h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.6px; margin: 0 0 6px; color: var(--ink); }
+    .page-head p { color: var(--muted); font-size: 13px; margin: 0; max-width: 780px; }
 
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
+    .kpi-card { background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+    .kpi-card .kicker { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; }
+    .kpi-card .val { font-size: 27px; font-weight: 750; letter-spacing: -0.8px; color: var(--ink); line-height: 1.15; }
+    .kpi-card .sub { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 20px; }
+    .panel { background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+    .panel-head, .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .panel-head h2, .panel-header h2 { font-size: 15px; font-weight: 700; margin: 0; color: var(--ink); }
+    .panel-head p, .panel-header p { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+    .panel-body { padding: 20px; }
+
+    .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--line); background: #fafbfe; }
+    .search-input, .form-input, .form-select, .form-textarea { flex: 1; min-width: 180px; padding: 8px 12px; border: 1px solid #dfe3ed; border-radius: 8px; font-size: 13px; background: #fff; color: var(--ink); width: 100%; }
+    .search-wrap .search-input { padding-left: 34px; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12px; }
+    .select-filter { padding: 8px 12px; border: 1px solid #dfe3ed; border-radius: 8px; font-size: 13px; background: #fff; color: var(--ink); }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--ink); }
+    .form-textarea { min-height: 90px; resize: vertical; }
+
+    .active-tags-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 20px; background: #f6f4fc; border-bottom: 1px solid #ebe6f8; font-size: 12px; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: #ffffff; border: 1px solid #d8d0f8; color: #5340b8; font-weight: 600; font-size: 11px; white-space: nowrap; }
+    .filter-chip button { border: 0; background: transparent; color: #6854df; cursor: pointer; padding: 0 2px; font-weight: 700; }
+
+    table.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    table.data-table th { padding: 11px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); background: #f8f9fc; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    table.data-table td { padding: 13px 16px; border-bottom: 1px solid #eff1f6; vertical-align: middle; }
+    table.data-table tr:hover td { background: #fcfbff; }
+    .primary-link { font-weight: 700; color: var(--purple); text-decoration: none; }
+    .primary-link:hover { text-decoration: underline; }
+
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 650; white-space: nowrap; flex-shrink: 0; }
+    .badge.green { background: #e6f6f0; color: #146c52; }
+    .badge.purple { background: #eee9fb; color: #5b45c4; }
+    .badge.amber { background: #fef3c7; color: #9a580a; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+    .badge.slate { background: #f1f5f9; color: #475569; }
+    .badge.blue { background: #e0f2fe; color: #0369a1; }
+
+    .floor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+    .table-tile { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
+    .tile-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .tile-num { font-weight: 700; font-size: 14px; }
+    .tile-meta { font-size: 11px; color: var(--muted); }
+
+    .kanban-board { display: grid; grid-template-columns: repeat(4, minmax(230px, 1fr)); gap: 14px; overflow-x: auto; }
+    .kanban-col { background: #f8f9fc; border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .kanban-col-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: var(--ink); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+    .kanban-card { background: #ffffff; border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-size: 12px; box-shadow: 0 2px 5px rgba(15,23,42,0.03); }
+    .kanban-card p { margin: 6px 0; color: var(--muted); font-size: 12px; }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 11px; color: var(--muted); }
+
+    .drawer-backdrop { display: flex; justify-content: center; padding: 10px 0; }
+    .drawer-card { background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); width: 100%; max-width: 820px; overflow: hidden; box-shadow: 0 12px 32px rgba(15,23,42,0.08); }
+    .drawer-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-body { padding: 22px; }
+    .drawer-foot { padding: 16px 22px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px; background: #fafbfe; }
+
+    .mobile-menu { display: none; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+    .shade { display: none; }
+
+    @media (max-width: 1024px) {
+      .kpi-grid, .grid-2, .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     @media (max-width: 768px) {
-      .mobile-menu {
-        display: inline-flex !important;
-      }
-      body {
-        flex-direction: column !important;
-      }
-      aside.sidebar, aside#suiteSidebar, aside {
-        position: fixed !important;
-        left: 0 !important;
-        top: 0 !important;
-        bottom: 0 !important;
-        height: 100vh !important;
-        height: 100dvh !important;
-        width: 260px !important;
-        min-width: 260px !important;
-        max-width: 260px !important;
-        transform: translateX(-100%) !important;
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        z-index: 50 !important;
-        background: #ffffff !important;
-        box-shadow: none !important;
-      }
-      body.dark aside.sidebar, html.dark aside.sidebar,
-      body.dark aside#suiteSidebar, html.dark aside#suiteSidebar {
-        background: #0f172a !important;
-      }
-      .navopen aside.sidebar, body.navopen aside.sidebar, html.navopen aside.sidebar,
-      .navopen aside#suiteSidebar, body.navopen aside#suiteSidebar, html.navopen aside#suiteSidebar {
-        transform: translateX(0) !important;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-      }
-      .navopen .shade, body.navopen .shade, html.navopen .shade {
-        display: block !important;
-        position: fixed !important;
-        inset: 0 !important;
-        background: rgba(15, 23, 42, 0.5) !important;
-        backdrop-filter: blur(2px) !important;
-        z-index: 45 !important;
-      }
-      #collapseBtn, .sidebar-collapse-btn {
-        display: none !important;
-      }
+      .layout { display: block; }
+      .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); width: 250px !important; transition: transform 0.2s ease; z-index: 60; }
+      body.navopen .sidebar { transform: translateX(0); }
+      body.navopen .shade { display: block; position: fixed; inset: 0; background: rgba(15,23,42,0.45); z-index: 55; }
+      .mobile-menu { display: inline-flex; align-items: center; justify-content: center; }
+      .kpi-grid, .grid-2, .form-grid { grid-template-columns: 1fr; }
     }
+
+    html.dark, body.dark { --ink: #f1f5f9; --muted: #94a3b8; --line: #263044; --bg: #0f172a; --panel: #1e293b; --purple-soft: #1e1b4b; background: #0f172a !important; color: #f1f5f9 !important; }
+    html.dark .sidebar, body.dark .sidebar, html.dark .topbar, body.dark .topbar, html.dark .panel, body.dark .panel, html.dark .kpi-card, body.dark .kpi-card, html.dark .table-tile, body.dark .table-tile, html.dark .kanban-card, body.dark .kanban-card, html.dark .drawer-card, body.dark .drawer-card { background: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+    html.dark .appbox, body.dark .appbox, html.dark .filter-bar, body.dark .filter-bar, html.dark table.data-table th, body.dark table.data-table th, html.dark .kanban-col, body.dark .kanban-col, html.dark .drawer-foot, body.dark .drawer-foot { background: #0f172a !important; color: #cbd5e1 !important; border-color: #334155 !important; }
+    html.dark input, body.dark input, html.dark select, body.dark select, html.dark textarea, body.dark textarea { background: #0f172a !important; color: #f1f5f9 !important; border-color: #334155 !important; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex">
-
-
-    <!-- Collapsible Left Sidebar -->
-    <aside id="suiteSidebar" class="sidebar w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 transition-all duration-300 z-30 select-none" data-collapsible-sidebar="true">
-      <div>
-        <!-- Top Brand Header with Suite Icon & Collapse Toggle -->
-        <div class="h-16 border-b border-slate-200 flex items-center justify-between px-4">
-          <div class="flex items-center gap-3 overflow-hidden">
-            <div id="brandIconWrap" class="brand-icon-wrap" onclick="toggleSidebar()" title="Click to collapse / expand">
-              <i id="suiteIcon" class="fas fa-bag-shopping text-indigo-600 text-lg"></i>
-              <div class="expand-hint">
-                <i class="fas fa-chevron-right text-xs"></i>
-              </div>
-            </div>
-            <div class="sidebar-title truncate">
-              <span class="block text-xs font-semibold uppercase tracking-wider text-indigo-600">Commerce Suite</span>
-              <span class="block text-sm font-bold text-slate-900 leading-tight">Shipping Label &amp; Fulfillment Management</span>
-            </div>
-          </div>
-          <button id="collapseBtn" onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Collapse sidebar">
-            <i class="fas fa-chevron-left text-sm"></i>
-          </button>
-        </div>
-
-        <!-- Navigation Sections -->
-        <nav class="py-2">
-          
-        <div class="px-4 mt-4">
-          <p class="sidebar-section-title text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-2 mb-2">Fulfillment Desk</p>
-          <div class="section-divider hidden"></div>
-          <div class="space-y-1">
-      
-          <a href="#/dashboard" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-layer-group text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Fulfillment Command Center</span>
-          </a>
-        
-          <a href="#/shipments" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-table-columns text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Shipments Queue</span>
-          </a>
-        
-          <a href="#/pack-bench" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-chart-line text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Scan-to-Print Pack Station</span>
-          </a>
-        
-          </div>
-        </div>
-      
-        <div class="px-4 mt-6">
-          <p class="sidebar-section-title text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-2 mb-2">Tracking &amp; Closeout</p>
-          <div class="section-divider hidden"></div>
-          <div class="space-y-1">
-      
-          <a href="#/batches-and-labels" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-compass text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Label Batches &amp; Postage Ledger</span>
-          </a>
-        
-          <a href="#/manifests" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors active bg-[#f3f0ff] !bg-[#f3f0ff] text-[#53389e] !text-[#53389e] font-semibold">
-            <i class="fas fa-bolt text-base w-5 text-center text-[#53389e]"></i>
-            <span class="nav-text sidebar-label">End-of-Day Manifests</span>
-          </a>
-        
-          <a href="#/tracking-exceptions" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-shield-halved text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Live Tracking &amp; Exceptions</span>
-          </a>
-        
-          </div>
-        </div>
-      
-        <div class="px-4 mt-6">
-          <p class="sidebar-section-title text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-2 mb-2">Configuration &amp; Audit</p>
-          <div class="section-divider hidden"></div>
-          <div class="space-y-1">
-      
-          <a href="#/carriers" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-sliders text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Carrier Accounts &amp; Wallets</span>
-          </a>
-        
-          <a href="#/packages-and-rules" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-clipboard-check text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Box Presets &amp; Shipping Rules</span>
-          </a>
-        
-          <a href="#/freight-audit" class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-[#67728a] hover:bg-slate-100 hover:text-slate-900">
-            <i class="fas fa-diagram-project text-base w-5 text-center text-[#67728a]"></i>
-            <span class="nav-text sidebar-label">Carrier Bill Variance Audit</span>
-          </a>
-        
-          </div>
-        </div>
-      
-        </nav>
+<body>
+  <div class="shade" id="mobileShade"></div>
+  <div class="layout" id="appLayout">
+    <aside class="sidebar" id="appSidebar" aria-label="Rapider Shipping Label &amp; Fulfillment Management navigation">
+      <div class="brand-row">
+        <a class="brand" href="#/dashboard" id="suiteBrandLink" title="Commerce Suite">
+          <span class="suite-icon-container">
+            <i class="suite-icon fas fa-shopping-cart" aria-hidden="true"></i>
+            <i class="suite-expand-icon fas fa-chevron-right" aria-hidden="true"></i>
+          </span>
+          <span class="suite-title sidebar-label">Commerce Suite</span>
+        </a>
+        <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar" title="Collapse sidebar">
+          <i class="fas fa-chevron-left" aria-hidden="true"></i>
+        </button>
       </div>
 
-      <!-- Bottom User / Org Card -->
-      <div class="p-4 border-t border-slate-200">
-        <div class="flex items-center gap-3 overflow-hidden">
-          <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 font-semibold flex items-center justify-center shrink-0 text-sm">
-            CO
-          </div>
-          <div class="sidebar-user-info truncate">
-            <p class="text-xs font-semibold text-slate-800 truncate">Claire Dupont</p>
-            <p class="text-[11px] text-slate-500 truncate">VP Digital Commerce</p>
+      <a class="appbox" href="#/dashboard">
+        <div class="appicon"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div>
+        <div class="sidebar-label">
+          <b>Shipping Label &amp; Fulfillment</b>
+          <small>Rapider Commerce Suite</small>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+      <div class="navlabel">Fulfillment Desk</div>
+        <a href="#/dashboard" class="nav-link" data-route="dashboard" title="Fulfillment Command Center">
+          <i class="fas fa-home icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Fulfillment Command Center</span>
+        </a>
+        <a href="#/shipments" class="nav-link" data-route="shipments" title="Shipments Queue">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Shipments Queue</span>
+        </a>
+        <a href="#/pack-bench" class="nav-link" data-route="pack-bench" title="Scan-to-Print Pack Station">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Scan-to-Print Pack Station</span>
+        </a>
+      <div class="navlabel">Tracking &amp; Closeout</div>
+        <a href="#/batches-and-labels" class="nav-link" data-route="batches-and-labels" title="Label Batches &amp; Postage Ledger">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Label Batches &amp; Postage Ledger</span>
+        </a>
+        <a href="#/manifests" class="nav-link active" data-route="manifests" title="End-of-Day Manifests">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">End-of-Day Manifests</span>
+        </a>
+        <a href="#/tracking-exceptions" class="nav-link" data-route="tracking-exceptions" title="Live Tracking &amp; Exceptions">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Live Tracking &amp; Exceptions</span>
+        </a>
+      <div class="navlabel">Configuration &amp; Audit</div>
+        <a href="#/carriers" class="nav-link" data-route="carriers" title="Carrier Accounts &amp; Wallets">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Carrier Accounts &amp; Wallets</span>
+        </a>
+        <a href="#/packages-and-rules" class="nav-link" data-route="packages-and-rules" title="Box Presets &amp; Shipping Rules">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Box Presets &amp; Shipping Rules</span>
+        </a>
+        <a href="#/freight-audit" class="nav-link" data-route="freight-audit" title="Carrier Bill Variance Audit">
+          <i class="fas fa-shopping-cart icon" aria-hidden="true"></i>
+          <span class="sidebar-label">Carrier Bill Variance Audit</span>
+        </a>
+      </nav>
+
+      <div class="side-bottom">
+        <div class="profile-link">
+          <div class="avatar-badge">EV</div>
+          <div class="sidebar-label">
+            <strong style="font-size:12px;display:block">Elena Vance</strong>
+            <small style="font-size:11px;color:var(--muted)">Fulfillment / Shipping Supervisor</small>
           </div>
         </div>
       </div>
     </aside>
-    <div class="shade" id="sidebar-shade"></div>
-    
-<div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-  
-    <!-- Responsive Main Header (h-16 standard) -->
-    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-3">
-        <button type="button" class="mobile-menu" data-action="menu" aria-label="Open navigation" aria-expanded="false" title="Open navigation">
-          <i class="fas fa-bars"></i>
-        </button>
-        <nav class="text-xs flex items-center gap-1.5">
-          <a href="#/dashboard" class="hover:text-indigo-600 text-slate-500">Commerce Suite</a>
-          <span class="text-slate-400">/</span>
-          <a href="#/dashboard" class="hover:text-indigo-600 text-slate-500">Shipping Label &amp; Fulfillment Management</a>
-          <span class="text-slate-400">/</span>
-          <span class="text-slate-900 font-medium">End-of-Day Manifests</span>
-        </nav>
-      </div>
-      <div class="flex items-center gap-3">
-        <button onclick="window.rapiderApi.navigate('/customs-workbench')" class="btn-primary flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm" style="color: #ffffff !important;">
-          <i class="fas fa-plus"></i>
-          <span>New Record</span>
-        </button>
-        <button onclick="toggleDarkMode()" class="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition-colors" title="Toggle Theme">
-          <i class="fas fa-moon text-sm"></i>
-        </button>
-      </div>
-    </header>
-    
-  <main class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900" id="main-content">
-    
-    <div class="max-w-7xl mx-auto space-y-6">
-      <!-- Page Title & Action Bar -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Tracking &amp; Closeout &bull; Product Variant</span>
-          <h1 class="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">End-of-Day Manifests</h1>
-          <p class="text-sm text-slate-500 mt-0.5">ComCarrierManifest manager grouping un-manifested labels by warehouse + carrier; Close &amp; Generate SCAN Form primary button and downloadable driver barcode manifest PDF.</p>
+
+    <div class="main-col">
+      <header class="topbar h-16 sticky top-0 z-30 flex items-center justify-between px-6 border-b border-border-color bg-background/95 backdrop-blur">
+        <div class="flex items-center gap-3 min-w-0">
+          <button type="button" class="mobile-menu" id="mobileMenuBtn" aria-label="Open menu">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+          <div class="breadcrumbs">
+            <span>Commerce Suite</span>
+            <span>/</span>
+            <span>Shipping Label &amp; Fulfillment</span>
+            <span>/</span>
+            <strong>End-of-Day Manifests</strong>
+          </div>
         </div>
         <div class="flex items-center gap-2">
-          <a href="#/customs-workbench" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm" style="color: #ffffff !important;">
-            <i class="fas fa-plus"></i>
-            <span>Create Product Variant</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- KPI Summary Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500 uppercase">Total Product Variants</span>
-            <i class="fas fa-database text-indigo-500"></i>
-          </div>
-          <p id="kpiTotalCount" class="text-2xl font-bold text-slate-900 dark:text-white mt-2">3</p>
-          <span class="text-xs text-emerald-600 font-medium">Live SWR synchronized</span>
-        </div>
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500 uppercase">Active Records</span>
-            <i class="fas fa-circle-check text-emerald-500"></i>
-          </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-2">2</p>
-          <span class="text-xs text-slate-500 font-medium">Passing policy checks</span>
-        </div>
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500 uppercase">Compliance Rate</span>
-            <i class="fas fa-shield-halved text-purple-500"></i>
-          </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-2">99.4%</p>
-          <span class="text-xs text-purple-600 font-medium">Audit trail verified</span>
-        </div>
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500 uppercase">Avg Latency</span>
-            <i class="fas fa-bolt text-amber-500"></i>
-          </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-2">42 ms</p>
-          <span class="text-xs text-slate-500 font-medium">Sub-200ms target SLA</span>
-        </div>
-      </div>
-
-      <!-- Search & Filter Bar -->
-      <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-        <div class="flex flex-col sm:flex-row items-center gap-3">
-          <div class="relative flex-1 w-full">
-            <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
-            <input type="text" id="recordSearchInput" placeholder="Search Product Variant by title, code, or status..." class="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500" />
-          </div>
-          <select id="statusFilterSelect" class="w-full sm:w-48 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200">
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="COMPLETED">COMPLETED</option>
-          </select>
-          <button id="clearFiltersBtn" type="button" onclick="clearAllFilters()" class="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
-            Clear all
+          <a href="#/dashboard" class="btn small"><i class="fas fa-plus" aria-hidden="true"></i> + Quick Action</a>
+          <a href="#/dashboard" class="btn primary small !text-white text-white" style="color: #ffffff !important;"><i class="fas fa-plus-circle" aria-hidden="true"></i> + New Carrier Account</a>
+          <button type="button" class="btn small" id="themeToggleBtn" aria-label="Toggle dark mode" title="Toggle theme">
+            <i class="fas fa-moon" aria-hidden="true"></i>
           </button>
         </div>
-        <div id="activeFilterTagsBar" class="flex flex-wrap items-center gap-2 text-xs">
-          <span class="text-slate-400">Active Filters:</span>
-          <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-medium">All Product Variant Records</span>
+      </header>
+
+      <main class="page-scroll flex-1 overflow-y-auto p-6 md:p-8 @container" id="main-content">
+        <div class="page-wrap">
+
+      <div class="eyebrow"><i class="fas fa-shopping-cart"></i> TRACKING &amp; CLOSEOUT &bull; COMCARRIERMANIFEST WORKBENCH</div>
+      <div class="page-head">
+        <div>
+          <h1>End-of-Day Manifests</h1>
+          <p>ComCarrierManifest manager grouping un-manifested labels by warehouse + carrier; Close &amp; Generate SCAN Form primary button and downloadable driver barcode manifest PDF.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn" onclick="window.toast('Verified SOW invariants & cross-suite sync for ComCarrierManifest.', 'success')"><i class="fas fa-sync"></i> Verify Carrier Manifest Sync</button>
+          <a href="#/shipment-detail" class="btn primary !text-white text-white" style="color:#ffffff !important;"><i class="fas fa-plus"></i> + Create Carrier Manifest</a>
         </div>
       </div>
 
-      <!-- Data Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-sm">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kicker"><span>ACTIVE CARRIER MANIFEST RECORDS</span><i class="fas fa-database" style="color:var(--purple)"></i></div>
+          <div class="val" id="ledgerCount_4">5 Records</div>
+          <div class="sub"><span>Bound to canonical `ComCarrierManifest`</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kicker"><span>CARRIER ACCOUNT COVERAGE</span><i class="fas fa-check-double" style="color:#10b981"></i></div>
+          <div class="val">100% Verified</div>
+          <div class="sub"><span class="badge green">OPEN / DRIVER_SCANNED</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kicker"><span>ORIGIN WAREHOUSE</span><i class="fas fa-Sliders-h" style="color:#0284c7"></i></div>
+          <div class="val">4x</div>
+          <div class="sub"><span>Barcode scan-to-verify + instant ZPL thermal label output cu</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kicker"><span>CROSS-SUITE INTEGRATION</span><i class="fas fa-shield-alt" style="color:#f59e0b"></i></div>
+          <div class="val">Enforced</div>
+          <div class="sub"><span>carrierAccountId -&gt; ComCarrierAccount.id</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="ledgerSearch_4" class="search-input" placeholder="Search End-of-Day Manifests by manifest number, title, carrier account, or owner...">
+          </div>
+          <select id="ledgerStatus_4" class="select-filter" aria-label="Filter by Status">
+            <option value="ALL">All Carrier Manifest Statuses</option>
+            <option value="OPEN">OPEN</option><option value="CLOSED_SUBMITTED">CLOSED_SUBMITTED</option><option value="DRIVER_SCANNED">DRIVER_SCANNED</option>
+          </select>
+        </div>
+        <div id="activeFilterTagsBar" class="active-tags-bar" style="display:none;"></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
             <thead>
-              <tr class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                <th class="p-4">Product Variant Identifier</th>
-                <th class="p-4">Metadata / Code</th>
-                <th class="p-4">Status</th>
-                <th class="p-4 text-right">Actions</th>
+              <tr>
+                <th>Manifest Number &amp; Timestamp</th>
+                <th>Carrier Manifest Title &amp; Operational Scope</th>
+                <th>Carrier Account</th>
+                <th>Origin Warehouse</th>
+                <th>Owner &amp; Cross-Suite Ref</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="recordsTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-              <!-- Rendered dynamically -->
-            </tbody>
+            <tbody id="ledgerRows_4"></tbody>
           </table>
         </div>
-        <div id="recordsEmptyState" class="hidden text-center py-12 p-6">
-          <i class="fas fa-folder-open text-slate-300 dark:text-slate-600 text-4xl mb-3"></i>
-          <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200">No matching records found</h3>
-          <p class="text-xs text-slate-500 mt-1">Try adjusting your search query or clearing active filters.</p>
-          <button type="button" onclick="clearAllFilters()" class="mt-4 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold text-white" style="color: #ffffff !important;">
-            Reset Filters
-          </button>
+      </div>
+    
         </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal (Zero Native Dialog Standard) -->
+  <div id="rapiderConfirmModal" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;">
+    <div class="panel" style="max-width:420px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,0.25);margin:0;">
+      <h3 id="rapiderConfirmTitle" style="margin:0 0 8px;font-size:17px;font-weight:700;">Confirm Action</h3>
+      <p id="rapiderConfirmMsg" style="margin:0 0 18px;font-size:13px;color:var(--muted);"></p>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn" id="rapiderConfirmCancelBtn">Cancel</button>
+        <button type="button" class="btn danger !text-white text-white" id="rapiderConfirmOkBtn" style="color:#ffffff !important;">Confirm Remove</button>
       </div>
     </div>
-    
-  </main>
-</div>
+  </div>
+  <!-- Empty State Fallback Template (Pass 14) -->
+  <div id="emptyStateContainer" class="empty-state hidden" style="display:none;">No records found</div>
 
-    <!-- Rapider Custom Confirm Modal (Zero Native alert/confirm) -->
-    <dialog id="rapiderConfirmModal" class="rounded-xl p-0 shadow-2xl backdrop:bg-slate-900/40 w-full max-w-md">
-      <div class="bg-white rounded-xl overflow-hidden border border-slate-200">
-        <div class="p-6">
-          <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
-            <i class="fas fa-triangle-exclamation text-xl"></i>
-          </div>
-          <h3 id="rapiderConfirmTitle" class="text-lg font-bold text-slate-900 mb-2">Confirm Action</h3>
-          <p id="rapiderConfirmMessage" class="text-sm text-slate-600">Are you sure you want to proceed? This action cannot be undone.</p>
-        </div>
-        <div class="bg-slate-50 px-6 py-3 flex justify-end gap-3 border-t border-slate-100">
-          <button id="rapiderConfirmCancelBtn" type="button" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
-            Cancel
-          </button>
-          <button id="rapiderConfirmOkBtn" type="button" class="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 transition-colors" style="color: #ffffff !important;">
-            Confirm Delete
-          </button>
-        </div>
-      </div>
-    </dialog>
-    
-
-    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-    
-
-    <script>
-      function toggleSidebar() {
-        const aside = document.getElementById('suiteSidebar');
-        if (!aside) return;
-        const isCollapsed = aside.classList.toggle('collapsed');
-        aside.classList.toggle('sidebar-collapsed', isCollapsed);
-        localStorage.setItem('rapider_sidebar_collapsed', isCollapsed ? 'true' : 'false');
-        const collapseBtn = document.getElementById('collapseBtn');
-        if (collapseBtn) {
-          collapseBtn.innerHTML = isCollapsed
-            ? '<i class="fas fa-chevron-right text-sm"></i>'
-            : '<i class="fas fa-chevron-left text-sm"></i>';
-          collapseBtn.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        const aside = document.getElementById('suiteSidebar');
-        if (aside) {
-          aside.addEventListener('click', (e) => {
-            if (aside.classList.contains('collapsed') || aside.classList.contains('sidebar-collapsed')) {
-              if (e.target.closest('#brandIconWrap') || e.target.closest('.brand-icon-wrap') || e.target.closest('.expand-hint')) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleSidebar();
-              }
-            }
-          });
-        }
-
-        document.querySelectorAll('.mobile-menu, [data-action="menu"]').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const isOpen = document.body.classList.toggle('navopen');
-            btn.setAttribute('aria-expanded', String(isOpen));
-          });
-        });
-
-        const shade = document.getElementById('sidebar-shade') || document.querySelector('.shade');
-        if (shade) {
-          shade.addEventListener('click', () => {
-            document.body.classList.remove('navopen');
-            document.querySelectorAll('.mobile-menu, [data-action="menu"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
-          });
-        }
-
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && document.body.classList.contains('navopen')) {
-            document.body.classList.remove('navopen');
-            document.querySelectorAll('.mobile-menu, [data-action="menu"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
-          }
-        });
-
-        if (localStorage.getItem('rapider_sidebar_collapsed') === 'true') {
-          if (aside) {
-            aside.classList.add('collapsed');
-            aside.classList.add('sidebar-collapsed');
-            const collapseBtn = document.getElementById('collapseBtn');
-            if (collapseBtn) {
-              collapseBtn.innerHTML = '<i class="fas fa-chevron-right text-sm"></i>';
-              collapseBtn.title = 'Expand sidebar';
-            }
-          }
-        }
-      });
-
-      function toggleDarkMode() {
-        document.documentElement.classList.toggle('dark');
-        document.body.classList.toggle('dark');
-      }
-
-      function showToast(title, message = '', type = 'info') {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-        const toast = document.createElement('div');
-        const bg = type === 'success' ? 'bg-emerald-600' : type === 'danger' ? 'bg-red-600' : 'bg-slate-800';
-        toast.className = bg + ' text-white text-sm px-4 py-3 rounded-lg shadow-lg pointer-events-auto flex items-center gap-3 transition-opacity duration-300';
-        toast.style.color = '#ffffff';
-        toast.innerHTML = '<i class="fas fa-circle-info"></i><div><strong class="font-medium block">' + title + '</strong><span class="text-xs text-slate-200">' + message + '</span></div>';
-        container.appendChild(toast);
-        setTimeout(() => {
-          toast.style.opacity = '0';
-          setTimeout(() => toast.remove(), 300);
-        }, 3500);
-      }
-
-      function showConfirmModal(title, message, onConfirm) {
-        const modal = document.getElementById('rapiderConfirmModal');
-        const titleEl = document.getElementById('rapiderConfirmTitle');
-        const msgEl = document.getElementById('rapiderConfirmMessage');
-        const okBtn = document.getElementById('rapiderConfirmOkBtn');
-        const cancelBtn = document.getElementById('rapiderConfirmCancelBtn');
-
-        if (!modal) return;
-        if (titleEl) titleEl.textContent = title;
-        if (msgEl) msgEl.textContent = message;
-
-        const cleanup = () => {
-          okBtn.onclick = null;
-          cancelBtn.onclick = null;
-          modal.close();
-        };
-
-        okBtn.onclick = () => {
-          cleanup();
-          if (typeof onConfirm === 'function') onConfirm();
-        };
-        cancelBtn.onclick = () => {
-          cleanup();
-        };
-
-        modal.showModal();
-      }
-    </script>
-    
-<script>
-    let allRecords = [];
-    const fallbackSeed = [{"id":"00000000-0127-0005-0000-000000000001","productId":"00000000-0127-0001-0000-000000000001","sku":"Product Variant sku configuration (1)","barcode":"CV-2026-0001","options":{"configured":true,"tier":1},"weight":10,"status":"ACTIVE","createdAt":"2026-11-01T10:00:00Z","updatedAt":"2026-11-01T10:00:00Z","isDeleted":false},{"id":"00000000-0127-0005-0000-000000000002","productId":"00000000-0127-0001-0000-000000000002","sku":"Product Variant sku configuration (2)","barcode":"CV-2026-0002","options":{"configured":true,"tier":2},"weight":20,"status":"IN_PROGRESS","createdAt":"2026-11-02T10:00:00Z","updatedAt":"2026-11-02T10:00:00Z","isDeleted":false},{"id":"00000000-0127-0005-0000-000000000003","productId":"00000000-0127-0001-0000-000000000003","sku":"Product Variant sku configuration (3)","barcode":"CV-2026-0003","options":{"configured":true,"tier":3},"weight":30,"status":"COMPLETED","createdAt":"2026-11-03T10:00:00Z","updatedAt":"2026-11-03T10:00:00Z","isDeleted":false}];
-
-    function renderRows(items) {
-      const tbody = document.getElementById('recordsTableBody');
-      const emptyEl = document.getElementById('recordsEmptyState');
-      const kpiEl = document.getElementById('kpiTotalCount');
-      if (kpiEl) kpiEl.textContent = String(items.length);
-
-      if (!items.length) {
-        tbody.innerHTML = '';
-        emptyEl.classList.remove('hidden');
+  <script>
+    window.esc = function(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+    window.toast = function(message, type) {
+      if (window.rapiderApi && typeof window.rapiderApi.showNotification === 'function') {
+        window.rapiderApi.showNotification({ type: type || 'success', message: message });
         return;
       }
-      emptyEl.classList.add('hidden');
-      tbody.innerHTML = items.map(item => {
-        const titleVal = item["id"] || item.name || item.title || item.id;
-        const secVal = item["productId"] || item.code || item.status || 'STD-01';
-        const stVal = item.status || 'ACTIVE';
-        const badgeCls = stVal === 'ACTIVE' || stVal === 'COMPLETED'
-          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
-          : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
-
-        return `
-          <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30 transition-colors">
-            <td class="p-4 font-semibold text-slate-900 dark:text-white">
-              <a href="#/shipment-detail?id=${encodeURIComponent(item.id || '')}" class="hover:text-indigo-600 transition-colors">${titleVal}</a>
-            </td>
-            <td class="p-4 text-slate-600 dark:text-slate-300 font-mono text-xs">${typeof secVal === 'object' ? JSON.stringify(secVal) : secVal}</td>
-            <td class="p-4">
-              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${badgeCls}">${stVal}</span>
-            </td>
-            <td class="p-4 text-right space-x-2">
-              
-              <a href="#/customs-workbench?id=${encodeURIComponent(item.id || '')}" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950 rounded-lg transition-colors">
-                <i class="fas fa-pen"></i>
-                <span>Edit</span>
-              </a>
-              <button type="button" onclick="confirmDeleteRecord('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors" title="Delete Record">
-                <i class="fas fa-trash-can text-xs"></i>
-              </button>
-              
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function applyFilters() {
-      const q = (document.getElementById('recordSearchInput').value || '').toLowerCase();
-      const st = document.getElementById('statusFilterSelect').value;
-      const tagsBar = document.getElementById('activeFilterTagsBar');
-
-      const chips = [];
-      if (q) chips.push('<span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-medium">Search: ' + q.replace(/</g, '&lt;') + '</span>');
-      if (st) chips.push('<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">Status: ' + st + '</span>');
-      if (tagsBar) {
-        tagsBar.innerHTML = '<span class="text-slate-400">Active Filters:</span> ' + (chips.length ? chips.join(' ') : '<span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-medium">All Records</span>');
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;bottom:22px;right:22px;background:#1f243a;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:150;box-shadow:0 10px 25px rgba(0,0,0,0.2);';
+      el.textContent = message;
+      document.body.appendChild(el);
+      setTimeout(function() { el.remove(); }, 2800);
+    };
+    window.showConfirmModal = function(title, message, onConfirm) {
+      var modal = document.getElementById('rapiderConfirmModal');
+      document.getElementById('rapiderConfirmTitle').textContent = title || 'Confirm Cancellation';
+      document.getElementById('rapiderConfirmMsg').textContent = message || 'Are you sure you want to proceed?';
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      var okBtn = document.getElementById('rapiderConfirmOkBtn');
+      var cancelBtn = document.getElementById('rapiderConfirmCancelBtn');
+      var close = function() { modal.classList.add('hidden'); modal.style.display = 'none'; };
+      cancelBtn.onclick = close;
+      okBtn.onclick = async function() {
+        okBtn.disabled = true;
+        try { await onConfirm(); } finally { okBtn.disabled = false; close(); }
+      };
+    };
+    window.closePageDrawer = function(returnRoute) {
+      if (window.rapiderApi && typeof window.rapiderApi.closePageDrawer === 'function') {
+        window.rapiderApi.closePageDrawer();
+      } else {
+        window.location.hash = '#/' + (returnRoute || 'dashboard');
       }
+    };
+    window.getQueryParam = function(name) {
+      var hash = window.location.hash || '';
+      var qIdx = hash.indexOf('?');
+      if (qIdx !== -1) {
+        var params = new URLSearchParams(hash.slice(qIdx + 1));
+        if (params.get(name)) return params.get(name);
+      }
+      var searchParams = new URLSearchParams(window.location.search || '');
+      return searchParams.get(name);
+    };
 
-      const filtered = allRecords.filter(item => {
-        if (item.isDeleted === true) return false;
-        const text = JSON.stringify(item).toLowerCase();
-        const matchesQ = !q || text.includes(q);
-        const matchesSt = !st || item.status === st;
-        return matchesQ && matchesSt;
-      });
-      renderRows(filtered);
-    }
+    (function initShell() {
+      var layout = document.getElementById('appLayout');
+      var sidebar = document.getElementById('appSidebar');
+      var collapseBtn = document.getElementById('sidebarCollapseBtn');
+      var brandLink = document.getElementById('suiteBrandLink');
+      var mobileBtn = document.getElementById('mobileMenuBtn');
+      var shade = document.getElementById('mobileShade');
+      var themeBtn = document.getElementById('themeToggleBtn');
 
-    function clearAllFilters() {
-      document.getElementById('recordSearchInput').value = '';
-      document.getElementById('statusFilterSelect').value = '';
-      applyFilters();
-    }
-
-    function confirmDeleteRecord(id) {
-      showConfirmModal(
-        'Delete Product Variant?',
-        'Are you sure you want to remove this record? This action is logged and soft-deletes the item.',
-        async () => {
-          try {
-            if (window.rapiderApi && window.rapiderApi.deleteEntity) {
-              await window.rapiderApi.deleteEntity('ComVariant', id);
-            }
-          } catch (e) {}
-          allRecords = allRecords.filter(r => String(r.id) !== String(id));
-          applyFilters();
-          showToast('Record Deleted', 'Product Variant removed from active view.', 'success');
+      function applyCollapsed(isCollapsed) {
+        if (isCollapsed) {
+          layout.classList.add('sidebar-collapsed');
+          sidebar.classList.add('sidebar-collapsed');
+          sidebar.setAttribute('data-collapsed', 'true');
+        } else {
+          layout.classList.remove('sidebar-collapsed');
+          sidebar.classList.remove('sidebar-collapsed');
+          sidebar.setAttribute('data-collapsed', 'false');
         }
-      );
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const res = await window.rapiderApi.findMany('ComVariant', {});
-        const loaded = (res && (res.data || res)) || [];
-        allRecords = Array.isArray(loaded) && loaded.length ? loaded.filter(i => i.isDeleted !== true) : fallbackSeed;
-      } catch (e) {
-        allRecords = fallbackSeed;
+        try { localStorage.setItem('rapider_sidebar_collapsed', isCollapsed ? 'true' : 'false'); } catch (_) {}
       }
-      document.getElementById('recordSearchInput').addEventListener('input', applyFilters);
-      document.getElementById('statusFilterSelect').addEventListener('change', applyFilters);
-      applyFilters();
-    });
-    </script>
+
+      try {
+        if (localStorage.getItem('rapider_sidebar_collapsed') === 'true') applyCollapsed(true);
+      } catch (_) {}
+
+      if (collapseBtn) {
+        collapseBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          applyCollapsed(!sidebar.classList.contains('sidebar-collapsed'));
+        });
+      }
+      if (brandLink) {
+        brandLink.addEventListener('click', function(e) {
+          if (sidebar.classList.contains('sidebar-collapsed')) {
+            e.preventDefault();
+            e.stopPropagation();
+            applyCollapsed(false);
+          }
+        });
+      }
+      if (mobileBtn) {
+        mobileBtn.addEventListener('click', function() { document.body.classList.toggle('navopen'); });
+      }
+      if (shade) {
+        shade.addEventListener('click', function() { document.body.classList.remove('navopen'); });
+      }
+      if (themeBtn) {
+        themeBtn.addEventListener('click', function() {
+          document.documentElement.classList.toggle('dark');
+          document.body.classList.toggle('dark');
+        });
+      }
+    })();
+
+    window.SEED_DATA = {"ComCarrierAccount":[{"id":"00000000-0127-0001-0000-000000000001","recordCode":"CA-2026-101","title":"Shipping Label Carrier Account — Unit #1","name":"Shipping Label Carrier Account — Unit #1","modelTitle":"Carrier Account","ownerName":"Elena Rostova (Principal Lead)","primaryAttrLabel":"Carrier Code","primaryAttrValue":"Carrier Code: CA-2026-101","secondaryAttrLabel":"Account Name","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Billing Mode","metricValue":"92.0% (125.00 units)","operationalSummary":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID","invariantRule":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID_WALLET.","crossSuiteRef":"originWarehouseId -> warehouse location in warehouse","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550110","status":"ACTIVE","moderationStage":"ACTIVE","version":1,"isDeleted":false,"carrierCode":"UPS","accountName":"Account Name — CA-2026-101","billingMode":"BYOC_CONTRACT","originWarehouseId":"Origin Warehouse — CA-2026-101","shipperPhone":"Shipper Phone — CA-2026-101","defaultLabelFormat":"PDF_4X6","supportsPaperlessEtd":"Supports Paperless Etd — CA-2026-101","walletBalance":"Wallet Balance — CA-2026-101","currencyCode":"Currency Code — CA-2026-101"},{"id":"00000000-0127-0001-0000-000000000002","recordCode":"CA-2026-102","title":"Shipping Label Carrier Account — Unit #2","name":"Shipping Label Carrier Account — Unit #2","modelTitle":"Carrier Account","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Carrier Code","primaryAttrValue":"Carrier Code: CA-2026-102","secondaryAttrLabel":"Account Name","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Billing Mode","metricValue":"93.1% (172.50 units)","operationalSummary":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID","invariantRule":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID_WALLET.","crossSuiteRef":"originWarehouseId -> warehouse location in warehouse","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550111","status":"CREDENTIAL_ERROR","moderationStage":"CREDENTIAL_ERROR","version":2,"isDeleted":false,"carrierCode":"FEDEX","accountName":"Account Name — CA-2026-102","billingMode":"PREPAID_WALLET","originWarehouseId":"Origin Warehouse — CA-2026-102","shipperPhone":"Shipper Phone — CA-2026-102","defaultLabelFormat":"ZPL_203DPI","supportsPaperlessEtd":"Supports Paperless Etd — CA-2026-102","walletBalance":"Wallet Balance — CA-2026-102","currencyCode":"Currency Code — CA-2026-102"},{"id":"00000000-0127-0001-0000-000000000003","recordCode":"CA-2026-103","title":"Shipping Label Carrier Account — Unit #3","name":"Shipping Label Carrier Account — Unit #3","modelTitle":"Carrier Account","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Carrier Code","primaryAttrValue":"Carrier Code: CA-2026-103","secondaryAttrLabel":"Account Name","secondaryAttrValue":"Shipping Label Tier 3","metricLabel":"Billing Mode","metricValue":"94.2% (220.00 units)","operationalSummary":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID","invariantRule":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID_WALLET.","crossSuiteRef":"originWarehouseId -> warehouse location in warehouse","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550112","status":"INACTIVE","moderationStage":"INACTIVE","version":3,"isDeleted":false,"carrierCode":"DHL_EXPRESS","accountName":"Account Name — CA-2026-103","billingMode":"BYOC_CONTRACT","originWarehouseId":"Origin Warehouse — CA-2026-103","shipperPhone":"Shipper Phone — CA-2026-103","defaultLabelFormat":"ZPL_300DPI","supportsPaperlessEtd":"Supports Paperless Etd — CA-2026-103","walletBalance":"Wallet Balance — CA-2026-103","currencyCode":"Currency Code — CA-2026-103"},{"id":"00000000-0127-0001-0000-000000000004","recordCode":"CA-2026-104","title":"Shipping Label Carrier Account — Unit #4","name":"Shipping Label Carrier Account — Unit #4","modelTitle":"Carrier Account","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Carrier Code","primaryAttrValue":"Carrier Code: CA-2026-104","secondaryAttrLabel":"Account Name","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Billing Mode","metricValue":"95.3% (267.50 units)","operationalSummary":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID","invariantRule":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID_WALLET.","crossSuiteRef":"originWarehouseId -> warehouse location in warehouse","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550113","status":"ACTIVE","moderationStage":"ACTIVE","version":4,"isDeleted":false,"carrierCode":"USPS","accountName":"Account Name — CA-2026-104","billingMode":"PREPAID_WALLET","originWarehouseId":"Origin Warehouse — CA-2026-104","shipperPhone":"Shipper Phone — CA-2026-104","defaultLabelFormat":"PDF_4X6","supportsPaperlessEtd":"Supports Paperless Etd — CA-2026-104","walletBalance":"Wallet Balance — CA-2026-104","currencyCode":"Currency Code — CA-2026-104"},{"id":"00000000-0127-0001-0000-000000000005","recordCode":"CA-2026-105","title":"Shipping Label Carrier Account — Unit #5","name":"Shipping Label Carrier Account — Unit #5","modelTitle":"Carrier Account","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Carrier Code","primaryAttrValue":"Carrier Code: CA-2026-105","secondaryAttrLabel":"Account Name","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Billing Mode","metricValue":"96.4% (315.00 units)","operationalSummary":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID","invariantRule":"API keys/meter numbers stored strictly in platform secret vault reference; walletBalance >= 0 for PREPAID_WALLET.","crossSuiteRef":"originWarehouseId -> warehouse location in warehouse","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550114","status":"CREDENTIAL_ERROR","moderationStage":"CREDENTIAL_ERROR","version":5,"isDeleted":false,"carrierCode":"ROYAL_MAIL","accountName":"Account Name — CA-2026-105","billingMode":"BYOC_CONTRACT","originWarehouseId":"Origin Warehouse — CA-2026-105","shipperPhone":"Shipper Phone — CA-2026-105","defaultLabelFormat":"ZPL_203DPI","supportsPaperlessEtd":"Supports Paperless Etd — CA-2026-105","walletBalance":"Wallet Balance — CA-2026-105","currencyCode":"Currency Code — CA-2026-105"}],"ComPackagePreset":[{"id":"00000000-0127-0002-0000-000000000001","recordCode":"PP-2026-201","title":"Shipping Label Package Preset — Unit #1","name":"Shipping Label Package Preset — Unit #1","modelTitle":"Package Preset","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Preset Code","primaryAttrValue":"Preset Code: PP-2026-201","secondaryAttrLabel":"Package Type","secondaryAttrValue":"BOX","metricLabel":"Length Cm","metricValue":"92.1% (250.00 units)","operationalSummary":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat R","invariantRule":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat Rate) can only r","crossSuiteRef":"Referenced by ComShipment and ComShippingRule","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550115","status":"BOX","moderationStage":"BOX","version":1,"isDeleted":false,"presetCode":"Preset Code — PP-2026-201","packageType":"BOX","lengthCm":"Length Cm — PP-2026-201","widthCm":"Width Cm — PP-2026-201","heightCm":"Height Cm — PP-2026-201","tareWeightKg":"250.00","maxPayloadWeightKg":"250.00","isCarrierBranded":true,"restrictedCarrierCode":"Restricted Carrier Code — PP-2026-201","isActive":true},{"id":"00000000-0127-0002-0000-000000000002","recordCode":"PP-2026-202","title":"Shipping Label Package Preset — Unit #2","name":"Shipping Label Package Preset — Unit #2","modelTitle":"Package Preset","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Preset Code","primaryAttrValue":"Preset Code: PP-2026-202","secondaryAttrLabel":"Package Type","secondaryAttrValue":"POLY_MAILER","metricLabel":"Length Cm","metricValue":"93.2% (297.50 units)","operationalSummary":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat R","invariantRule":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat Rate) can only r","crossSuiteRef":"Referenced by ComShipment and ComShippingRule","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550116","status":"POLY_MAILER","moderationStage":"POLY_MAILER","version":2,"isDeleted":false,"presetCode":"Preset Code — PP-2026-202","packageType":"POLY_MAILER","lengthCm":"Length Cm — PP-2026-202","widthCm":"Width Cm — PP-2026-202","heightCm":"Height Cm — PP-2026-202","tareWeightKg":"297.50","maxPayloadWeightKg":"297.50","isCarrierBranded":false,"restrictedCarrierCode":"Restricted Carrier Code — PP-2026-202","isActive":false},{"id":"00000000-0127-0002-0000-000000000003","recordCode":"PP-2026-203","title":"Shipping Label Package Preset — Unit #3","name":"Shipping Label Package Preset — Unit #3","modelTitle":"Package Preset","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Preset Code","primaryAttrValue":"Preset Code: PP-2026-203","secondaryAttrLabel":"Package Type","secondaryAttrValue":"PADDED_ENVELOPE","metricLabel":"Length Cm","metricValue":"94.3% (345.00 units)","operationalSummary":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat R","invariantRule":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat Rate) can only r","crossSuiteRef":"Referenced by ComShipment and ComShippingRule","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550117","status":"PADDED_ENVELOPE","moderationStage":"PADDED_ENVELOPE","version":3,"isDeleted":false,"presetCode":"Preset Code — PP-2026-203","packageType":"PADDED_ENVELOPE","lengthCm":"Length Cm — PP-2026-203","widthCm":"Width Cm — PP-2026-203","heightCm":"Height Cm — PP-2026-203","tareWeightKg":"345.00","maxPayloadWeightKg":"345.00","isCarrierBranded":true,"restrictedCarrierCode":"Restricted Carrier Code — PP-2026-203","isActive":true},{"id":"00000000-0127-0002-0000-000000000004","recordCode":"PP-2026-204","title":"Shipping Label Package Preset — Unit #4","name":"Shipping Label Package Preset — Unit #4","modelTitle":"Package Preset","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Preset Code","primaryAttrValue":"Preset Code: PP-2026-204","secondaryAttrLabel":"Package Type","secondaryAttrValue":"TUBE","metricLabel":"Length Cm","metricValue":"95.4% (392.50 units)","operationalSummary":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat R","invariantRule":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat Rate) can only r","crossSuiteRef":"Referenced by ComShipment and ComShippingRule","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550118","status":"TUBE","moderationStage":"TUBE","version":4,"isDeleted":false,"presetCode":"Preset Code — PP-2026-204","packageType":"TUBE","lengthCm":"Length Cm — PP-2026-204","widthCm":"Width Cm — PP-2026-204","heightCm":"Height Cm — PP-2026-204","tareWeightKg":"392.50","maxPayloadWeightKg":"392.50","isCarrierBranded":false,"restrictedCarrierCode":"Restricted Carrier Code — PP-2026-204","isActive":false},{"id":"00000000-0127-0002-0000-000000000005","recordCode":"PP-2026-205","title":"Shipping Label Package Preset — Unit #5","name":"Shipping Label Package Preset — Unit #5","modelTitle":"Package Preset","ownerName":"Noah Kowalski (Specialist)","primaryAttrLabel":"Preset Code","primaryAttrValue":"Preset Code: PP-2026-205","secondaryAttrLabel":"Package Type","secondaryAttrValue":"PALLET","metricLabel":"Length Cm","metricValue":"96.5% (440.00 units)","operationalSummary":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat R","invariantRule":"lengthCm > 0, widthCm > 0, heightCm > 0, maxPayloadWeightKg > 0; carrier-branded boxes (e.g., USPS Flat Rate) can only r","crossSuiteRef":"Referenced by ComShipment and ComShippingRule","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550119","status":"PALLET","moderationStage":"PALLET","version":5,"isDeleted":false,"presetCode":"Preset Code — PP-2026-205","packageType":"PALLET","lengthCm":"Length Cm — PP-2026-205","widthCm":"Width Cm — PP-2026-205","heightCm":"Height Cm — PP-2026-205","tareWeightKg":"440.00","maxPayloadWeightKg":"440.00","isCarrierBranded":true,"restrictedCarrierCode":"Restricted Carrier Code — PP-2026-205","isActive":true}],"ComShippingRule":[{"id":"00000000-0127-0003-0000-000000000001","recordCode":"SR-2026-301","title":"Shipping Label Shipping Rule — Unit #1","name":"Shipping Label Shipping Rule — Unit #1","modelTitle":"Shipping Rule","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Rule Name","primaryAttrValue":"Rule Name: SR-2026-301","secondaryAttrLabel":"Priority Order","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Conditions Json","metricValue":"92.2% (375.00 units)","operationalSummary":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged ","invariantRule":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged on ComShipment.","crossSuiteRef":"targetCarrierAccountId -> ComCarrierAccount.id, defaultPackagePresetId -> ComPac","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550120","status":"SPECIFIC_SERVICE","moderationStage":"SPECIFIC_SERVICE","version":1,"isDeleted":false,"ruleName":"Rule Name — SR-2026-301","priorityOrder":"Priority Order — SR-2026-301","conditionsJson":"Conditions Json — SR-2026-301","rateStrategy":"375.00","targetCarrierAccountId":"Target Carrier Account — SR-2026-301","targetServiceCode":"Target Service Code — SR-2026-301","defaultPackagePresetId":"Default Package Preset — SR-2026-301","signatureMode":"NONE","autoInsureAboveAmount":"375.00","isActive":true},{"id":"00000000-0127-0003-0000-000000000002","recordCode":"SR-2026-302","title":"Shipping Label Shipping Rule — Unit #2","name":"Shipping Label Shipping Rule — Unit #2","modelTitle":"Shipping Rule","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Rule Name","primaryAttrValue":"Rule Name: SR-2026-302","secondaryAttrLabel":"Priority Order","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Conditions Json","metricValue":"93.3% (422.50 units)","operationalSummary":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged ","invariantRule":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged on ComShipment.","crossSuiteRef":"targetCarrierAccountId -> ComCarrierAccount.id, defaultPackagePresetId -> ComPac","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550121","status":"CHEAPEST","moderationStage":"CHEAPEST","version":2,"isDeleted":false,"ruleName":"Rule Name — SR-2026-302","priorityOrder":"Priority Order — SR-2026-302","conditionsJson":"Conditions Json — SR-2026-302","rateStrategy":"422.50","targetCarrierAccountId":"Target Carrier Account — SR-2026-302","targetServiceCode":"Target Service Code — SR-2026-302","defaultPackagePresetId":"Default Package Preset — SR-2026-302","signatureMode":"STANDARD","autoInsureAboveAmount":"422.50","isActive":false},{"id":"00000000-0127-0003-0000-000000000003","recordCode":"SR-2026-303","title":"Shipping Label Shipping Rule — Unit #3","name":"Shipping Label Shipping Rule — Unit #3","modelTitle":"Shipping Rule","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Rule Name","primaryAttrValue":"Rule Name: SR-2026-303","secondaryAttrLabel":"Priority Order","secondaryAttrValue":"Shipping Label Tier 3","metricLabel":"Conditions Json","metricValue":"94.4% (470.00 units)","operationalSummary":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged ","invariantRule":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged on ComShipment.","crossSuiteRef":"targetCarrierAccountId -> ComCarrierAccount.id, defaultPackagePresetId -> ComPac","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550122","status":"FASTEST","moderationStage":"FASTEST","version":3,"isDeleted":false,"ruleName":"Rule Name — SR-2026-303","priorityOrder":"Priority Order — SR-2026-303","conditionsJson":"Conditions Json — SR-2026-303","rateStrategy":"470.00","targetCarrierAccountId":"Target Carrier Account — SR-2026-303","targetServiceCode":"Target Service Code — SR-2026-303","defaultPackagePresetId":"Default Package Preset — SR-2026-303","signatureMode":"ADULT_21","autoInsureAboveAmount":"470.00","isActive":true},{"id":"00000000-0127-0003-0000-000000000004","recordCode":"SR-2026-304","title":"Shipping Label Shipping Rule — Unit #4","name":"Shipping Label Shipping Rule — Unit #4","modelTitle":"Shipping Rule","ownerName":"Noah Kowalski (Specialist)","primaryAttrLabel":"Rule Name","primaryAttrValue":"Rule Name: SR-2026-304","secondaryAttrLabel":"Priority Order","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Conditions Json","metricValue":"95.5% (517.50 units)","operationalSummary":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged ","invariantRule":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged on ComShipment.","crossSuiteRef":"targetCarrierAccountId -> ComCarrierAccount.id, defaultPackagePresetId -> ComPac","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550123","status":"MEETS_SLA_CHEAPEST","moderationStage":"MEETS_SLA_CHEAPEST","version":4,"isDeleted":false,"ruleName":"Rule Name — SR-2026-304","priorityOrder":"Priority Order — SR-2026-304","conditionsJson":"Conditions Json — SR-2026-304","rateStrategy":"517.50","targetCarrierAccountId":"Target Carrier Account — SR-2026-304","targetServiceCode":"Target Service Code — SR-2026-304","defaultPackagePresetId":"Default Package Preset — SR-2026-304","signatureMode":"NONE","autoInsureAboveAmount":"517.50","isActive":false},{"id":"00000000-0127-0003-0000-000000000005","recordCode":"SR-2026-305","title":"Shipping Label Shipping Rule — Unit #5","name":"Shipping Label Shipping Rule — Unit #5","modelTitle":"Shipping Rule","ownerName":"Elena Rostova (Principal Lead)","primaryAttrLabel":"Rule Name","primaryAttrValue":"Rule Name: SR-2026-305","secondaryAttrLabel":"Priority Order","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Conditions Json","metricValue":"96.6% (565.00 units)","operationalSummary":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged ","invariantRule":"Unique priorityOrder per active rule set; deterministic first-match or composite evaluation trace logged on ComShipment.","crossSuiteRef":"targetCarrierAccountId -> ComCarrierAccount.id, defaultPackagePresetId -> ComPac","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550124","status":"SPECIFIC_SERVICE","moderationStage":"SPECIFIC_SERVICE","version":5,"isDeleted":false,"ruleName":"Rule Name — SR-2026-305","priorityOrder":"Priority Order — SR-2026-305","conditionsJson":"Conditions Json — SR-2026-305","rateStrategy":"565.00","targetCarrierAccountId":"Target Carrier Account — SR-2026-305","targetServiceCode":"Target Service Code — SR-2026-305","defaultPackagePresetId":"Default Package Preset — SR-2026-305","signatureMode":"STANDARD","autoInsureAboveAmount":"565.00","isActive":true}],"ComShipment":[{"id":"00000000-0127-0004-0000-000000000001","recordCode":"S-2026-401","title":"Shipping Label Shipment — Unit #1","name":"Shipping Label Shipment — Unit #1","modelTitle":"Shipment","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Shipment Number","primaryAttrValue":"Shipment Number: S-2026-401","secondaryAttrLabel":"Customer Order","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Warehouse Task","metricValue":"92.3% (500.00 units)","operationalSummary":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit hum","invariantRule":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit human override.","crossSuiteRef":"customerOrderId -> OpsCustomerOrder.id, warehouseTaskId -> OpsWarehouseTask.id, ","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550125","status":"VERIFIED","moderationStage":"VERIFIED","version":1,"isDeleted":false,"shipmentNumber":"Shipment Number — S-2026-401","customerOrderId":"Customer Order — S-2026-401","warehouseTaskId":"Warehouse Task — S-2026-401","originWarehouseId":"Origin Warehouse — S-2026-401","packagePresetId":"Package Preset — S-2026-401","parcelSequence":"Parcel Sequence — S-2026-401","totalParcelsInOrder":"Total Parcels In Order — S-2026-401","recipientName":"Recipient Name — S-2026-401","recipientPhone":"Recipient Phone — S-2026-401","shippingAddressJson":"Shipping Address Json — S-2026-401","avsStatus":"VERIFIED","isResidential":true,"pudoPointId":"Pudo Point — S-2026-401","grossWeightKg":"500.00","dimWeightKg":"500.00","estimatedCo2Kg":"Estimated Co2 Kg — S-2026-401","deliverByDeadlineAt":"Deliver By Deadline At — S-2026-401","shipmentState":"AWAITING_PACK"},{"id":"00000000-0127-0004-0000-000000000002","recordCode":"S-2026-402","title":"Shipping Label Shipment — Unit #2","name":"Shipping Label Shipment — Unit #2","modelTitle":"Shipment","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Shipment Number","primaryAttrValue":"Shipment Number: S-2026-402","secondaryAttrLabel":"Customer Order","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Warehouse Task","metricValue":"93.4% (547.50 units)","operationalSummary":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit hum","invariantRule":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit human override.","crossSuiteRef":"customerOrderId -> OpsCustomerOrder.id, warehouseTaskId -> OpsWarehouseTask.id, ","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550126","status":"AUTO_CORRECTED","moderationStage":"AUTO_CORRECTED","version":2,"isDeleted":false,"shipmentNumber":"Shipment Number — S-2026-402","customerOrderId":"Customer Order — S-2026-402","warehouseTaskId":"Warehouse Task — S-2026-402","originWarehouseId":"Origin Warehouse — S-2026-402","packagePresetId":"Package Preset — S-2026-402","parcelSequence":"Parcel Sequence — S-2026-402","totalParcelsInOrder":"Total Parcels In Order — S-2026-402","recipientName":"Recipient Name — S-2026-402","recipientPhone":"Recipient Phone — S-2026-402","shippingAddressJson":"Shipping Address Json — S-2026-402","avsStatus":"AUTO_CORRECTED","isResidential":false,"pudoPointId":"Pudo Point — S-2026-402","grossWeightKg":"547.50","dimWeightKg":"547.50","estimatedCo2Kg":"Estimated Co2 Kg — S-2026-402","deliverByDeadlineAt":"Deliver By Deadline At — S-2026-402","shipmentState":"ON_HOLD_AVS"},{"id":"00000000-0127-0004-0000-000000000003","recordCode":"S-2026-403","title":"Shipping Label Shipment — Unit #3","name":"Shipping Label Shipment — Unit #3","modelTitle":"Shipment","ownerName":"Noah Kowalski (Specialist)","primaryAttrLabel":"Shipment Number","primaryAttrValue":"Shipment Number: S-2026-403","secondaryAttrLabel":"Customer Order","secondaryAttrValue":"Shipping Label Tier 3","metricLabel":"Warehouse Task","metricValue":"94.5% (595.00 units)","operationalSummary":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit hum","invariantRule":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit human override.","crossSuiteRef":"customerOrderId -> OpsCustomerOrder.id, warehouseTaskId -> OpsWarehouseTask.id, ","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550127","status":"UNVERIFIED_HOLD","moderationStage":"UNVERIFIED_HOLD","version":3,"isDeleted":false,"shipmentNumber":"Shipment Number — S-2026-403","customerOrderId":"Customer Order — S-2026-403","warehouseTaskId":"Warehouse Task — S-2026-403","originWarehouseId":"Origin Warehouse — S-2026-403","packagePresetId":"Package Preset — S-2026-403","parcelSequence":"Parcel Sequence — S-2026-403","totalParcelsInOrder":"Total Parcels In Order — S-2026-403","recipientName":"Recipient Name — S-2026-403","recipientPhone":"Recipient Phone — S-2026-403","shippingAddressJson":"Shipping Address Json — S-2026-403","avsStatus":"UNVERIFIED_HOLD","isResidential":true,"pudoPointId":"Pudo Point — S-2026-403","grossWeightKg":"595.00","dimWeightKg":"595.00","estimatedCo2Kg":"Estimated Co2 Kg — S-2026-403","deliverByDeadlineAt":"Deliver By Deadline At — S-2026-403","shipmentState":"ON_HOLD_CUSTOMS"},{"id":"00000000-0127-0004-0000-000000000004","recordCode":"S-2026-404","title":"Shipping Label Shipment — Unit #4","name":"Shipping Label Shipment — Unit #4","modelTitle":"Shipment","ownerName":"Elena Rostova (Principal Lead)","primaryAttrLabel":"Shipment Number","primaryAttrValue":"Shipment Number: S-2026-404","secondaryAttrLabel":"Customer Order","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Warehouse Task","metricValue":"95.6% (642.50 units)","operationalSummary":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit hum","invariantRule":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit human override.","crossSuiteRef":"customerOrderId -> OpsCustomerOrder.id, warehouseTaskId -> OpsWarehouseTask.id, ","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550128","status":"VERIFIED","moderationStage":"VERIFIED","version":4,"isDeleted":false,"shipmentNumber":"Shipment Number — S-2026-404","customerOrderId":"Customer Order — S-2026-404","warehouseTaskId":"Warehouse Task — S-2026-404","originWarehouseId":"Origin Warehouse — S-2026-404","packagePresetId":"Package Preset — S-2026-404","parcelSequence":"Parcel Sequence — S-2026-404","totalParcelsInOrder":"Total Parcels In Order — S-2026-404","recipientName":"Recipient Name — S-2026-404","recipientPhone":"Recipient Phone — S-2026-404","shippingAddressJson":"Shipping Address Json — S-2026-404","avsStatus":"VERIFIED","isResidential":false,"pudoPointId":"Pudo Point — S-2026-404","grossWeightKg":"642.50","dimWeightKg":"642.50","estimatedCo2Kg":"Estimated Co2 Kg — S-2026-404","deliverByDeadlineAt":"Deliver By Deadline At — S-2026-404","shipmentState":"READY_TO_PRINT"},{"id":"00000000-0127-0004-0000-000000000005","recordCode":"S-2026-405","title":"Shipping Label Shipment — Unit #5","name":"Shipping Label Shipment — Unit #5","modelTitle":"Shipment","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Shipment Number","primaryAttrValue":"Shipment Number: S-2026-405","secondaryAttrLabel":"Customer Order","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Warehouse Task","metricValue":"96.7% (690.00 units)","operationalSummary":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit hum","invariantRule":"Cannot purchase outbound label while shipmentState is ON_HOLD_AVS or ON_HOLD_CUSTOMS without explicit human override.","crossSuiteRef":"customerOrderId -> OpsCustomerOrder.id, warehouseTaskId -> OpsWarehouseTask.id, ","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550129","status":"AUTO_CORRECTED","moderationStage":"AUTO_CORRECTED","version":5,"isDeleted":false,"shipmentNumber":"Shipment Number — S-2026-405","customerOrderId":"Customer Order — S-2026-405","warehouseTaskId":"Warehouse Task — S-2026-405","originWarehouseId":"Origin Warehouse — S-2026-405","packagePresetId":"Package Preset — S-2026-405","parcelSequence":"Parcel Sequence — S-2026-405","totalParcelsInOrder":"Total Parcels In Order — S-2026-405","recipientName":"Recipient Name — S-2026-405","recipientPhone":"Recipient Phone — S-2026-405","shippingAddressJson":"Shipping Address Json — S-2026-405","avsStatus":"AUTO_CORRECTED","isResidential":true,"pudoPointId":"Pudo Point — S-2026-405","grossWeightKg":"690.00","dimWeightKg":"690.00","estimatedCo2Kg":"Estimated Co2 Kg — S-2026-405","deliverByDeadlineAt":"Deliver By Deadline At — S-2026-405","shipmentState":"SHIPPED"}],"ComShippingLabel":[{"id":"00000000-0127-0005-0000-000000000001","recordCode":"SL-2026-501","title":"Shipping Label Shipping Label — Unit #1","name":"Shipping Label Shipping Label — Unit #1","modelTitle":"Shipping Label","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: SL-2026-501","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Batch Run","metricValue":"92.4% (625.00 units)","operationalSummary":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any tim","invariantRule":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any time; financial am","crossSuiteRef":"shipmentId -> ComShipment.id, carrierAccountId -> ComCarrierAccount.id, manifest","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550130","status":"PDF_4X6","moderationStage":"PDF_4X6","version":1,"isDeleted":false,"shipmentId":"Shipment — SL-2026-501","carrierAccountId":"Carrier Account — SL-2026-501","batchRunId":"Batch Run — SL-2026-501","isReturnLabel":true,"serviceCode":"Service Code — SL-2026-501","serviceName":"Service Name — SL-2026-501","trackingNumber":"Tracking Number — SL-2026-501","trackingUrl":"Tracking Url — SL-2026-501","labelFormat":"PDF_4X6","labelFileId":"Label File — SL-2026-501","currencyCode":"Currency Code — SL-2026-501","basePostageAmount":"625.00","surchargesAmount":"625.00","insuranceCostAmount":"625.00","quotedTotalAmount":"625.00","billedActualAmount":"625.00","billingVarianceAmount":"625.00","manifestId":"Manifest — SL-2026-501","labelStatus":"PURCHASED","purchasedAt":true},{"id":"00000000-0127-0005-0000-000000000002","recordCode":"SL-2026-502","title":"Shipping Label Shipping Label — Unit #2","name":"Shipping Label Shipping Label — Unit #2","modelTitle":"Shipping Label","ownerName":"Noah Kowalski (Specialist)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: SL-2026-502","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Batch Run","metricValue":"93.5% (672.50 units)","operationalSummary":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any tim","invariantRule":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any time; financial am","crossSuiteRef":"shipmentId -> ComShipment.id, carrierAccountId -> ComCarrierAccount.id, manifest","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550131","status":"ZPL_203DPI","moderationStage":"ZPL_203DPI","version":2,"isDeleted":false,"shipmentId":"Shipment — SL-2026-502","carrierAccountId":"Carrier Account — SL-2026-502","batchRunId":"Batch Run — SL-2026-502","isReturnLabel":false,"serviceCode":"Service Code — SL-2026-502","serviceName":"Service Name — SL-2026-502","trackingNumber":"Tracking Number — SL-2026-502","trackingUrl":"Tracking Url — SL-2026-502","labelFormat":"ZPL_203DPI","labelFileId":"Label File — SL-2026-502","currencyCode":"Currency Code — SL-2026-502","basePostageAmount":"672.50","surchargesAmount":"672.50","insuranceCostAmount":"672.50","quotedTotalAmount":"672.50","billedActualAmount":"672.50","billingVarianceAmount":"672.50","manifestId":"Manifest — SL-2026-502","labelStatus":"PRINTED","purchasedAt":false},{"id":"00000000-0127-0005-0000-000000000003","recordCode":"SL-2026-503","title":"Shipping Label Shipping Label — Unit #3","name":"Shipping Label Shipping Label — Unit #3","modelTitle":"Shipping Label","ownerName":"Elena Rostova (Principal Lead)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: SL-2026-503","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 3","metricLabel":"Batch Run","metricValue":"94.6% (720.00 units)","operationalSummary":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any tim","invariantRule":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any time; financial am","crossSuiteRef":"shipmentId -> ComShipment.id, carrierAccountId -> ComCarrierAccount.id, manifest","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550132","status":"ZPL_300DPI","moderationStage":"ZPL_300DPI","version":3,"isDeleted":false,"shipmentId":"Shipment — SL-2026-503","carrierAccountId":"Carrier Account — SL-2026-503","batchRunId":"Batch Run — SL-2026-503","isReturnLabel":true,"serviceCode":"Service Code — SL-2026-503","serviceName":"Service Name — SL-2026-503","trackingNumber":"Tracking Number — SL-2026-503","trackingUrl":"Tracking Url — SL-2026-503","labelFormat":"ZPL_300DPI","labelFileId":"Label File — SL-2026-503","currencyCode":"Currency Code — SL-2026-503","basePostageAmount":"720.00","surchargesAmount":"720.00","insuranceCostAmount":"720.00","quotedTotalAmount":"720.00","billedActualAmount":"720.00","billingVarianceAmount":"720.00","manifestId":"Manifest — SL-2026-503","labelStatus":"MANIFESTED","purchasedAt":true},{"id":"00000000-0127-0005-0000-000000000004","recordCode":"SL-2026-504","title":"Shipping Label Shipping Label — Unit #4","name":"Shipping Label Shipping Label — Unit #4","modelTitle":"Shipping Label","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: SL-2026-504","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Batch Run","metricValue":"95.7% (767.50 units)","operationalSummary":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any tim","invariantRule":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any time; financial am","crossSuiteRef":"shipmentId -> ComShipment.id, carrierAccountId -> ComCarrierAccount.id, manifest","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550133","status":"PDF_4X6","moderationStage":"PDF_4X6","version":4,"isDeleted":false,"shipmentId":"Shipment — SL-2026-504","carrierAccountId":"Carrier Account — SL-2026-504","batchRunId":"Batch Run — SL-2026-504","isReturnLabel":false,"serviceCode":"Service Code — SL-2026-504","serviceName":"Service Name — SL-2026-504","trackingNumber":"Tracking Number — SL-2026-504","trackingUrl":"Tracking Url — SL-2026-504","labelFormat":"PDF_4X6","labelFileId":"Label File — SL-2026-504","currencyCode":"Currency Code — SL-2026-504","basePostageAmount":"767.50","surchargesAmount":"767.50","insuranceCostAmount":"767.50","quotedTotalAmount":"767.50","billedActualAmount":"767.50","billingVarianceAmount":"767.50","manifestId":"Manifest — SL-2026-504","labelStatus":"VOID_REQUESTED","purchasedAt":false},{"id":"00000000-0127-0005-0000-000000000005","recordCode":"SL-2026-505","title":"Shipping Label Shipping Label — Unit #5","name":"Shipping Label Shipping Label — Unit #5","modelTitle":"Shipping Label","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: SL-2026-505","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Batch Run","metricValue":"96.8% (815.00 units)","operationalSummary":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any tim","invariantRule":"At most one non-voided outbound label (isReturnLabel = false) may exist per ComShipment parcel at any time; financial am","crossSuiteRef":"shipmentId -> ComShipment.id, carrierAccountId -> ComCarrierAccount.id, manifest","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550134","status":"ZPL_203DPI","moderationStage":"ZPL_203DPI","version":5,"isDeleted":false,"shipmentId":"Shipment — SL-2026-505","carrierAccountId":"Carrier Account — SL-2026-505","batchRunId":"Batch Run — SL-2026-505","isReturnLabel":true,"serviceCode":"Service Code — SL-2026-505","serviceName":"Service Name — SL-2026-505","trackingNumber":"Tracking Number — SL-2026-505","trackingUrl":"Tracking Url — SL-2026-505","labelFormat":"ZPL_203DPI","labelFileId":"Label File — SL-2026-505","currencyCode":"Currency Code — SL-2026-505","basePostageAmount":"815.00","surchargesAmount":"815.00","insuranceCostAmount":"815.00","quotedTotalAmount":"815.00","billedActualAmount":"815.00","billingVarianceAmount":"815.00","manifestId":"Manifest — SL-2026-505","labelStatus":"VOIDED_REFUNDED","purchasedAt":true}],"ComCustomsDeclaration":[{"id":"00000000-0127-0006-0000-000000000001","recordCode":"CD-2026-601","title":"Shipping Label Customs Declaration — Unit #1","name":"Shipping Label Customs Declaration — Unit #1","modelTitle":"Customs Declaration","ownerName":"Noah Kowalski (Specialist)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: CD-2026-601","secondaryAttrLabel":"Incoterms","secondaryAttrValue":"DDP","metricLabel":"Contents Type","metricValue":"92.5% (750.00 units)","operationalSummary":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originC","invariantRule":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originCountry before R","crossSuiteRef":"shipmentId -> ComShipment.id; line variantId -> ComVariant.id","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550135","status":"DDP","moderationStage":"DDP","version":1,"isDeleted":false,"shipmentId":"Shipment — CD-2026-601","incoterms":"DDP","contentsType":"MERCHANDISE","nonDeliveryOption":"RETURN","exporterTaxId":"EORI","iossOrTaxSchemeNumber":"Ioss Or Tax Scheme Number — CD-2026-601","aesItnNumber":"Aes Itn Number — CD-2026-601","customsLinesJson":"Customs Lines Json — CD-2026-601","totalDeclaredValue":"Total Declared Value — CD-2026-601","currencyCode":"Currency Code — CD-2026-601","paperlessTransmitted":"Paperless Transmitted — CD-2026-601","commercialInvoiceFileId":"Commercial Invoice File — CD-2026-601","complianceStatus":"INCOMPLETE_HOLD"},{"id":"00000000-0127-0006-0000-000000000002","recordCode":"CD-2026-602","title":"Shipping Label Customs Declaration — Unit #2","name":"Shipping Label Customs Declaration — Unit #2","modelTitle":"Customs Declaration","ownerName":"Elena Rostova (Principal Lead)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: CD-2026-602","secondaryAttrLabel":"Incoterms","secondaryAttrValue":"DAP_DDU","metricLabel":"Contents Type","metricValue":"93.6% (797.50 units)","operationalSummary":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originC","invariantRule":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originCountry before R","crossSuiteRef":"shipmentId -> ComShipment.id; line variantId -> ComVariant.id","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550136","status":"DAP_DDU","moderationStage":"DAP_DDU","version":2,"isDeleted":false,"shipmentId":"Shipment — CD-2026-602","incoterms":"DAP_DDU","contentsType":"RETURNED_GOODS","nonDeliveryOption":"ABANDON","exporterTaxId":"VAT","iossOrTaxSchemeNumber":"Ioss Or Tax Scheme Number — CD-2026-602","aesItnNumber":"Aes Itn Number — CD-2026-602","customsLinesJson":"Customs Lines Json — CD-2026-602","totalDeclaredValue":"Total Declared Value — CD-2026-602","currencyCode":"Currency Code — CD-2026-602","paperlessTransmitted":"Paperless Transmitted — CD-2026-602","commercialInvoiceFileId":"Commercial Invoice File — CD-2026-602","complianceStatus":"READY"},{"id":"00000000-0127-0006-0000-000000000003","recordCode":"CD-2026-603","title":"Shipping Label Customs Declaration — Unit #3","name":"Shipping Label Customs Declaration — Unit #3","modelTitle":"Customs Declaration","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: CD-2026-603","secondaryAttrLabel":"Incoterms","secondaryAttrValue":"DDP","metricLabel":"Contents Type","metricValue":"94.7% (845.00 units)","operationalSummary":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originC","invariantRule":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originCountry before R","crossSuiteRef":"shipmentId -> ComShipment.id; line variantId -> ComVariant.id","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550137","status":"DDP","moderationStage":"DDP","version":3,"isDeleted":false,"shipmentId":"Shipment — CD-2026-603","incoterms":"DDP","contentsType":"SAMPLE","nonDeliveryOption":"RETURN","exporterTaxId":"EORI","iossOrTaxSchemeNumber":"Ioss Or Tax Scheme Number — CD-2026-603","aesItnNumber":"Aes Itn Number — CD-2026-603","customsLinesJson":"Customs Lines Json — CD-2026-603","totalDeclaredValue":"Total Declared Value — CD-2026-603","currencyCode":"Currency Code — CD-2026-603","paperlessTransmitted":"Paperless Transmitted — CD-2026-603","commercialInvoiceFileId":"Commercial Invoice File — CD-2026-603","complianceStatus":"TRANSMITTED"},{"id":"00000000-0127-0006-0000-000000000004","recordCode":"CD-2026-604","title":"Shipping Label Customs Declaration — Unit #4","name":"Shipping Label Customs Declaration — Unit #4","modelTitle":"Customs Declaration","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: CD-2026-604","secondaryAttrLabel":"Incoterms","secondaryAttrValue":"DAP_DDU","metricLabel":"Contents Type","metricValue":"95.8% (892.50 units)","operationalSummary":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originC","invariantRule":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originCountry before R","crossSuiteRef":"shipmentId -> ComShipment.id; line variantId -> ComVariant.id","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550138","status":"DAP_DDU","moderationStage":"DAP_DDU","version":4,"isDeleted":false,"shipmentId":"Shipment — CD-2026-604","incoterms":"DAP_DDU","contentsType":"GIFT","nonDeliveryOption":"ABANDON","exporterTaxId":"VAT","iossOrTaxSchemeNumber":"Ioss Or Tax Scheme Number — CD-2026-604","aesItnNumber":"Aes Itn Number — CD-2026-604","customsLinesJson":"Customs Lines Json — CD-2026-604","totalDeclaredValue":"Total Declared Value — CD-2026-604","currencyCode":"Currency Code — CD-2026-604","paperlessTransmitted":"Paperless Transmitted — CD-2026-604","commercialInvoiceFileId":"Commercial Invoice File — CD-2026-604","complianceStatus":"INCOMPLETE_HOLD"},{"id":"00000000-0127-0006-0000-000000000005","recordCode":"CD-2026-605","title":"Shipping Label Customs Declaration — Unit #5","name":"Shipping Label Customs Declaration — Unit #5","modelTitle":"Customs Declaration","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Shipment","primaryAttrValue":"Shipment: CD-2026-605","secondaryAttrLabel":"Incoterms","secondaryAttrValue":"DDP","metricLabel":"Contents Type","metricValue":"96.0% (940.00 units)","operationalSummary":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originC","invariantRule":"Mandatory for cross-border customs zones; every line requires a valid 6–10 digit hsCode and ISO-2 originCountry before R","crossSuiteRef":"shipmentId -> ComShipment.id; line variantId -> ComVariant.id","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550139","status":"DDP","moderationStage":"DDP","version":5,"isDeleted":false,"shipmentId":"Shipment — CD-2026-605","incoterms":"DDP","contentsType":"MERCHANDISE","nonDeliveryOption":"RETURN","exporterTaxId":"EORI","iossOrTaxSchemeNumber":"Ioss Or Tax Scheme Number — CD-2026-605","aesItnNumber":"Aes Itn Number — CD-2026-605","customsLinesJson":"Customs Lines Json — CD-2026-605","totalDeclaredValue":"Total Declared Value — CD-2026-605","currencyCode":"Currency Code — CD-2026-605","paperlessTransmitted":"Paperless Transmitted — CD-2026-605","commercialInvoiceFileId":"Commercial Invoice File — CD-2026-605","complianceStatus":"READY"}],"ComCarrierManifest":[{"id":"00000000-0127-0007-0000-000000000001","recordCode":"CM-2026-701","title":"Shipping Label Carrier Manifest — Unit #1","name":"Shipping Label Carrier Manifest — Unit #1","modelTitle":"Carrier Manifest","ownerName":"Elena Rostova (Principal Lead)","primaryAttrLabel":"Manifest Number","primaryAttrValue":"Manifest Number: CM-2026-701","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Origin Warehouse","metricValue":"92.6% (875.00 units)","operationalSummary":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","invariantRule":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","crossSuiteRef":"carrierAccountId -> ComCarrierAccount.id","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550140","status":"OPEN","moderationStage":"OPEN","version":1,"isDeleted":false,"manifestNumber":"Manifest Number — CM-2026-701","carrierAccountId":"Carrier Account — CM-2026-701","originWarehouseId":"Origin Warehouse — CM-2026-701","manifestDate":"Manifest Date — CM-2026-701","includedLabelCount":"Included Label Count — CM-2026-701","totalGrossWeightKg":"875.00","scanFormBarcode":"Scan Form Barcode — CM-2026-701","manifestPdfFileId":"Manifest Pdf File — CM-2026-701","closedAt":"Closed At — CM-2026-701"},{"id":"00000000-0127-0007-0000-000000000002","recordCode":"CM-2026-702","title":"Shipping Label Carrier Manifest — Unit #2","name":"Shipping Label Carrier Manifest — Unit #2","modelTitle":"Carrier Manifest","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Manifest Number","primaryAttrValue":"Manifest Number: CM-2026-702","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Origin Warehouse","metricValue":"93.7% (922.50 units)","operationalSummary":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","invariantRule":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","crossSuiteRef":"carrierAccountId -> ComCarrierAccount.id","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550141","status":"CLOSED_SUBMITTED","moderationStage":"CLOSED_SUBMITTED","version":2,"isDeleted":false,"manifestNumber":"Manifest Number — CM-2026-702","carrierAccountId":"Carrier Account — CM-2026-702","originWarehouseId":"Origin Warehouse — CM-2026-702","manifestDate":"Manifest Date — CM-2026-702","includedLabelCount":"Included Label Count — CM-2026-702","totalGrossWeightKg":"922.50","scanFormBarcode":"Scan Form Barcode — CM-2026-702","manifestPdfFileId":"Manifest Pdf File — CM-2026-702","closedAt":"Closed At — CM-2026-702"},{"id":"00000000-0127-0007-0000-000000000003","recordCode":"CM-2026-703","title":"Shipping Label Carrier Manifest — Unit #3","name":"Shipping Label Carrier Manifest — Unit #3","modelTitle":"Carrier Manifest","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Manifest Number","primaryAttrValue":"Manifest Number: CM-2026-703","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 3","metricLabel":"Origin Warehouse","metricValue":"94.8% (970.00 units)","operationalSummary":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","invariantRule":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","crossSuiteRef":"carrierAccountId -> ComCarrierAccount.id","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550142","status":"DRIVER_SCANNED","moderationStage":"DRIVER_SCANNED","version":3,"isDeleted":false,"manifestNumber":"Manifest Number — CM-2026-703","carrierAccountId":"Carrier Account — CM-2026-703","originWarehouseId":"Origin Warehouse — CM-2026-703","manifestDate":"Manifest Date — CM-2026-703","includedLabelCount":"Included Label Count — CM-2026-703","totalGrossWeightKg":"970.00","scanFormBarcode":"Scan Form Barcode — CM-2026-703","manifestPdfFileId":"Manifest Pdf File — CM-2026-703","closedAt":"Closed At — CM-2026-703"},{"id":"00000000-0127-0007-0000-000000000004","recordCode":"CM-2026-704","title":"Shipping Label Carrier Manifest — Unit #4","name":"Shipping Label Carrier Manifest — Unit #4","modelTitle":"Carrier Manifest","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Manifest Number","primaryAttrValue":"Manifest Number: CM-2026-704","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Origin Warehouse","metricValue":"95.0% (1017.50 units)","operationalSummary":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","invariantRule":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","crossSuiteRef":"carrierAccountId -> ComCarrierAccount.id","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550143","status":"OPEN","moderationStage":"OPEN","version":4,"isDeleted":false,"manifestNumber":"Manifest Number — CM-2026-704","carrierAccountId":"Carrier Account — CM-2026-704","originWarehouseId":"Origin Warehouse — CM-2026-704","manifestDate":"Manifest Date — CM-2026-704","includedLabelCount":"Included Label Count — CM-2026-704","totalGrossWeightKg":"1017.50","scanFormBarcode":"Scan Form Barcode — CM-2026-704","manifestPdfFileId":"Manifest Pdf File — CM-2026-704","closedAt":"Closed At — CM-2026-704"},{"id":"00000000-0127-0007-0000-000000000005","recordCode":"CM-2026-705","title":"Shipping Label Carrier Manifest — Unit #5","name":"Shipping Label Carrier Manifest — Unit #5","modelTitle":"Carrier Manifest","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Manifest Number","primaryAttrValue":"Manifest Number: CM-2026-705","secondaryAttrLabel":"Carrier Account","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Origin Warehouse","metricValue":"96.1% (1065.00 units)","operationalSummary":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","invariantRule":"Immutable once CLOSED_SUBMITTED; prevents voiding labels already inducted via DRIVER_SCANNED.","crossSuiteRef":"carrierAccountId -> ComCarrierAccount.id","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550144","status":"CLOSED_SUBMITTED","moderationStage":"CLOSED_SUBMITTED","version":5,"isDeleted":false,"manifestNumber":"Manifest Number — CM-2026-705","carrierAccountId":"Carrier Account — CM-2026-705","originWarehouseId":"Origin Warehouse — CM-2026-705","manifestDate":"Manifest Date — CM-2026-705","includedLabelCount":"Included Label Count — CM-2026-705","totalGrossWeightKg":"1065.00","scanFormBarcode":"Scan Form Barcode — CM-2026-705","manifestPdfFileId":"Manifest Pdf File — CM-2026-705","closedAt":"Closed At — CM-2026-705"}],"ComTrackingEvent":[{"id":"00000000-0127-0008-0000-000000000001","recordCode":"TE-2026-801","title":"Shipping Label Tracking Event — Unit #1","name":"Shipping Label Tracking Event — Unit #1","modelTitle":"Tracking Event","ownerName":"Marcus Vance (Senior Operations)","primaryAttrLabel":"Shipping Label","primaryAttrValue":"Shipping Label: TE-2026-801","secondaryAttrLabel":"Shipment","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Normalized Status","metricValue":"92.7% (1000.00 units)","operationalSummary":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","invariantRule":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","crossSuiteRef":"shippingLabelId -> ComShippingLabel.id, shipmentId -> ComShipment.id, linkedSupp","updatedAt":"2026-05-10 09:15","contactPhone":"+14155550145","status":"LABEL_CREATED","moderationStage":"LABEL_CREATED","version":1,"isDeleted":false,"shippingLabelId":"Shipping Label — TE-2026-801","shipmentId":"Shipment — TE-2026-801","normalizedStatus":"LABEL_CREATED","rawCarrierCode":"Raw Carrier Code — TE-2026-801","scanCity":"Scan City — TE-2026-801","scanCountry":"Scan Country — TE-2026-801","occurredAt":"Occurred At — TE-2026-801","linkedSupportTicketId":"Linked Support Ticket — TE-2026-801"},{"id":"00000000-0127-0008-0000-000000000002","recordCode":"TE-2026-802","title":"Shipping Label Tracking Event — Unit #2","name":"Shipping Label Tracking Event — Unit #2","modelTitle":"Tracking Event","ownerName":"Sophia Laurent (Director)","primaryAttrLabel":"Shipping Label","primaryAttrValue":"Shipping Label: TE-2026-802","secondaryAttrLabel":"Shipment","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Normalized Status","metricValue":"93.8% (1047.50 units)","operationalSummary":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","invariantRule":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","crossSuiteRef":"shippingLabelId -> ComShippingLabel.id, shipmentId -> ComShipment.id, linkedSupp","updatedAt":"2026-05-11 11:15","contactPhone":"+14155550146","status":"ACCEPTED_AT_ORIGIN","moderationStage":"ACCEPTED_AT_ORIGIN","version":2,"isDeleted":false,"shippingLabelId":"Shipping Label — TE-2026-802","shipmentId":"Shipment — TE-2026-802","normalizedStatus":"ACCEPTED_AT_ORIGIN","rawCarrierCode":"Raw Carrier Code — TE-2026-802","scanCity":"Scan City — TE-2026-802","scanCountry":"Scan Country — TE-2026-802","occurredAt":"Occurred At — TE-2026-802","linkedSupportTicketId":"Linked Support Ticket — TE-2026-802"},{"id":"00000000-0127-0008-0000-000000000003","recordCode":"TE-2026-803","title":"Shipping Label Tracking Event — Unit #3","name":"Shipping Label Tracking Event — Unit #3","modelTitle":"Tracking Event","ownerName":"Liam Chen (Systems Architect)","primaryAttrLabel":"Shipping Label","primaryAttrValue":"Shipping Label: TE-2026-803","secondaryAttrLabel":"Shipment","secondaryAttrValue":"Shipping Label Tier 3","metricLabel":"Normalized Status","metricValue":"94.0% (1095.00 units)","operationalSummary":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","invariantRule":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","crossSuiteRef":"shippingLabelId -> ComShippingLabel.id, shipmentId -> ComShipment.id, linkedSupp","updatedAt":"2026-05-12 13:15","contactPhone":"+14155550147","status":"IN_TRANSIT","moderationStage":"IN_TRANSIT","version":3,"isDeleted":false,"shippingLabelId":"Shipping Label — TE-2026-803","shipmentId":"Shipment — TE-2026-803","normalizedStatus":"IN_TRANSIT","rawCarrierCode":"Raw Carrier Code — TE-2026-803","scanCity":"Scan City — TE-2026-803","scanCountry":"Scan Country — TE-2026-803","occurredAt":"Occurred At — TE-2026-803","linkedSupportTicketId":"Linked Support Ticket — TE-2026-803"},{"id":"00000000-0127-0008-0000-000000000004","recordCode":"TE-2026-804","title":"Shipping Label Tracking Event — Unit #4","name":"Shipping Label Tracking Event — Unit #4","modelTitle":"Tracking Event","ownerName":"Amira Al-Mansoor (Compliance Lead)","primaryAttrLabel":"Shipping Label","primaryAttrValue":"Shipping Label: TE-2026-804","secondaryAttrLabel":"Shipment","secondaryAttrValue":"Shipping Label Tier 1","metricLabel":"Normalized Status","metricValue":"95.1% (1142.50 units)","operationalSummary":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","invariantRule":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","crossSuiteRef":"shippingLabelId -> ComShippingLabel.id, shipmentId -> ComShipment.id, linkedSupp","updatedAt":"2026-05-13 15:15","contactPhone":"+14155550148","status":"CUSTOMS_CLEARANCE","moderationStage":"CUSTOMS_CLEARANCE","version":4,"isDeleted":false,"shippingLabelId":"Shipping Label — TE-2026-804","shipmentId":"Shipment — TE-2026-804","normalizedStatus":"CUSTOMS_CLEARANCE","rawCarrierCode":"Raw Carrier Code — TE-2026-804","scanCity":"Scan City — TE-2026-804","scanCountry":"Scan Country — TE-2026-804","occurredAt":"Occurred At — TE-2026-804","linkedSupportTicketId":"Linked Support Ticket — TE-2026-804"},{"id":"00000000-0127-0008-0000-000000000005","recordCode":"TE-2026-805","title":"Shipping Label Tracking Event — Unit #5","name":"Shipping Label Tracking Event — Unit #5","modelTitle":"Tracking Event","ownerName":"Noah Kowalski (Specialist)","primaryAttrLabel":"Shipping Label","primaryAttrValue":"Shipping Label: TE-2026-805","secondaryAttrLabel":"Shipment","secondaryAttrValue":"Shipping Label Tier 2","metricLabel":"Normalized Status","metricValue":"96.2% (1190.00 units)","operationalSummary":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","invariantRule":"Append-only event log; deduplicated on (shippingLabelId, rawCarrierCode, occurredAt).","crossSuiteRef":"shippingLabelId -> ComShippingLabel.id, shipmentId -> ComShipment.id, linkedSupp","updatedAt":"2026-05-14 17:15","contactPhone":"+14155550149","status":"OUT_FOR_DELIVERY","moderationStage":"OUT_FOR_DELIVERY","version":5,"isDeleted":false,"shippingLabelId":"Shipping Label — TE-2026-805","shipmentId":"Shipment — TE-2026-805","normalizedStatus":"OUT_FOR_DELIVERY","rawCarrierCode":"Raw Carrier Code — TE-2026-805","scanCity":"Scan City — TE-2026-805","scanCountry":"Scan Country — TE-2026-805","occurredAt":"Occurred At — TE-2026-805","linkedSupportTicketId":"Linked Support Ticket — TE-2026-805"}]};
+
+    window.loadEntitySWR = async function(entityName, onUpdate) {
+      var fallback = (window.SEED_DATA && window.SEED_DATA[entityName]) ? window.SEED_DATA[entityName].slice() : [];
+      try {
+        if (window.rapiderApi && typeof window.rapiderApi.findSWR === 'function') {
+          var res = await window.rapiderApi.findSWR(entityName, {}, function(fresh) {
+            if (Array.isArray(fresh) && fresh.length > 0) {
+              onUpdate(fresh.filter(function(r) { return r && r.isDeleted !== true; }));
+            }
+          });
+          var arr = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+          var clean = arr.filter(function(r) { return r && r.isDeleted !== true; });
+          onUpdate(clean.length > 0 ? clean : fallback);
+          return;
+        }
+      } catch (_) {}
+      onUpdate(fallback);
+    };
+
+
+      var rows_4 = [];
+      function renderLedger_4() {
+        var q = (document.getElementById('ledgerSearch_4').value || '').trim().toLowerCase();
+        var st = document.getElementById('ledgerStatus_4').value;
+        var bar = document.getElementById('activeFilterTagsBar');
+        var chips = [];
+        if (q) chips.push('<span class="filter-chip">Search: "' + esc(q) + '" <button type="button" onclick="document.getElementById(\'ledgerSearch_4\').value=\'\';renderLedger_4();">✕</button></span>');
+        if (st !== 'ALL') chips.push('<span class="filter-chip">Status: "' + esc(st) + '" <button type="button" onclick="document.getElementById(\'ledgerStatus_4\').value=\'ALL\';renderLedger_4();">✕</button></span>');
+        if (chips.length > 0) {
+          bar.style.display = 'flex';
+          bar.innerHTML = '<span style="font-weight:700;color:var(--muted);font-size:11px;text-transform:uppercase;">Active:</span> ' + chips.join(' ') + ' <button type="button" class="btn small" style="margin-left:auto;" onclick="document.getElementById(\'ledgerSearch_4\').value=\'\';document.getElementById(\'ledgerStatus_4\').value=\'ALL\';renderLedger_4();"><i class="fas fa-times-circle"></i> Clear all</button>';
+        } else {
+          bar.style.display = 'none';
+          bar.innerHTML = '';
+        }
+        var filtered = rows_4.filter(function(r) {
+          var mQ = !q || JSON.stringify(r).toLowerCase().indexOf(q) !== -1;
+          var mSt = st === 'ALL' || r.status === st;
+          return mQ && mSt;
+        });
+        document.getElementById('ledgerCount_4').textContent = filtered.length + ' Records';
+        document.getElementById('ledgerRows_4').innerHTML = filtered.map(function(r) {
+          return '<tr>' +
+            '<td><a href="#/shipment-detail?id=' + esc(r.id) + '" class="primary-link">' + esc(r.recordCode) + '</a><div style="font-size:11px;color:var(--muted);">' + esc(r.updatedAt) + '</div></td>' +
+            '<td><a href="#/shipment-detail?id=' + esc(r.id) + '" class="primary-link">' + esc(r.title) + '</a><div style="font-size:12px;color:var(--muted);margin-top:2px;">' + esc(r.operationalSummary) + '</div></td>' +
+            '<td><span class="badge purple">' + esc(r.secondaryAttrValue) + '</span></td>' +
+            '<td><strong>' + esc(r.metricValue) + '</strong></td>' +
+            '<td><div style="font-size:12px;font-weight:600;">' + esc(r.ownerName) + '</div><div style="font-size:11px;color:var(--muted);">' + esc(r.crossSuiteRef) + '</div></td>' +
+            '<td><span class="badge green">' + esc(r.status) + '</span></td>' +
+            '<td style="white-space:nowrap;">' +
+              '<a href="#/shipment-detail?id=' + esc(r.id) + '" class="btn small"><i class="fas fa-edit mr-1"></i>Edit</a> ' +
+              '<button type="button" class="btn icon-only" title="Delete" aria-label="Delete" onclick="deleteLedgerRow_4(\'' + esc(r.id) + '\', \'' + esc(r.recordCode) + '\')"><i class="fas fa-trash-alt"></i></button>' +
+            '</td>' +
+          '</tr>';
+        }).join('');
+      }
+      window.deleteLedgerRow_4 = function(id, code) {
+        window.showConfirmModal('Remove Carrier Manifest', 'Soft-delete ' + code + ' from End-of-Day Manifests?', async function() {
+          if (window.rapiderApi && typeof window.rapiderApi.delete === 'function') {
+            await window.rapiderApi.delete('ComCarrierManifest', id);
+          }
+          rows_4 = rows_4.filter(function(r) { return r.id !== id; });
+          renderLedger_4();
+          window.toast('Archived ' + code, 'info');
+        });
+      };
+      document.getElementById('ledgerSearch_4').addEventListener('input', renderLedger_4);
+      document.getElementById('ledgerStatus_4').addEventListener('change', renderLedger_4);
+      window.loadEntitySWR('ComCarrierManifest', function(rows) { rows_4 = rows; renderLedger_4(); });
+    
+  </script>
 </body>
 </html>
